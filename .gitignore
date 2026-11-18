@@ -1,0 +1,8 @@
+# vim swap/backup files
+*.swp
+*.swo
+*~
+
+# Cloudflare / Node local files
+.wrangler/
+node_modules/

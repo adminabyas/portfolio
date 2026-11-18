@@ -1,0 +1,23 @@
+// =============================================================
+// wrangler.jsonc: Cloudflare Workers deployment config
+// Project: portfolio (static site)
+// Used by: Cloudflare Workers Builds. On every push to main it
+//          runs `npx wrangler deploy` and uploads ./public.
+// Format:  JSONC = JSON with comments. Only full-line comments
+//          are used, so they can be stripped for linting.
+// Docs:    https://developers.cloudflare.com/workers/static-assets/
+// =============================================================
+{
+  // Worker name. Must match the project name in the Cloudflare dashboard.
+  "name": "portfolio",
+
+  // Pins the Workers runtime behaviour to this date, so platform
+  // updates can't silently change how the site behaves.
+  "compatibility_date": "2026-11-18",
+
+  // Static site: everything in ./public is uploaded and served as-is.
+  // No Worker script, so unknown paths return 404.
+  "assets": {
+    "directory": "./public"
+  }
+}

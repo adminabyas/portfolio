@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!-- Maintenance page: served instead of public/ while version 2 is in progress.
+     Toggle: "assets.directory" in wrangler.jsonc (./maintenance <-> ./public). -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Keep this temporary page out of search engine indexes -->
+  <meta name="robots" content="noindex">
+  <title>Velislav · working on version 2</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+           background: #0d1117; color: #c9d1d9; font-family: ui-monospace, monospace; }
+    main { max-width: 36rem; padding: 2rem; }
+    .prompt { color: #3fb950; }
+    a { color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><span class="prompt">$</span> systemctl status portfolio</p>
+    <p>● portfolio — Active: <strong>maintenance</strong></p>
+    <p>Working on version 2. Back soon.</p>
+    <p>Meanwhile: <a href="https://www.linkedin.com/in/vtonkov/">LinkedIn</a></p>
+  </main>
+</body>
+</html>

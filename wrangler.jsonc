@@ -18,6 +18,6 @@
   // Static site: everything in ./public is uploaded and served as-is.
   // No Worker script, so unknown paths return 404.
   "assets": {
-    "directory": "./public"
+    "directory": "./maintenance"
   }
 }

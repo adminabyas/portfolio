@@ -1,680 +1,746 @@
 <!DOCTYPE html>
+<!--
+  Portfolio page, version 2 (skeleton).
+  One file, no build step, no external requests (system fonts only, GDPR).
+
+  How this file is organised:
+    1. <style>  : design tokens and layout (v2 look)
+    2. <body>   : empty frames for every section; JavaScript fills them
+    3. <script> : DATA (edit this)  →  RENDERING (normally no changes needed)
+
+  Content lives ONLY in the DATA part of the script.
+  draft: true = kept in the source, not shown on the page.
+  Note: the source is public, so drafts are readable by anyone who opens it.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Velislav · Linux portfolio &amp; working log</title>
+<title>Velislav · Linux / DevOps portfolio</title>
 <style>
-  /* ============ Design tokens ============ */
+  /* ============ Design tokens: every colour and font is defined once here ============ */
   :root{
-    --bg: #0a0d0c;
-    --surface: #111513;
-    --surface-2: #161c19;
-    --border: #232a26;
-    --ink: #e6ece8;
-    --muted: #7d8b86;
-    --accent: #46e08a;
-    --accent-soft: rgba(70,224,138,0.14);
-    --glow-accent: 0 0 8px rgba(70,224,138,0.55);
-    --status-ok: #54c7d6;
-    --status-ok-soft: rgba(84,199,214,0.16);
-    --glow-cyan: 0 0 8px rgba(84,199,214,0.5);
-    --status-todo: #4a5550;
-    --radius: 6px;
-    --maxw: 880px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "IBM Plex Sans", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+    --bg: #0b0f12;          /* page background */
+    --bg-alt: #0d1216;      /* every second section */
+    --surface: #11171b;     /* cards and panels */
+    --surface-2: #182128;   /* chips */
+    --line: #22303a;        /* card borders */
+    --line-soft: #1c272f;   /* section borders */
+    --line-strong: #2c3b45; /* button borders */
+    --ink: #e6edf0;         /* main text */
+    --ink-2: #c3d0d6;       /* secondary text */
+    --ink-3: #b7c4ca;       /* lead text */
+    --muted: #93a4ad;       /* muted text */
+    --muted-2: #7d8f99;     /* labels */
+    --accent: #46e08a;      /* green: shipped, links, buttons */
+    --cyan: #54c7d6;        /* entry kind (log / runbook / note) */
+    --amber: #f2b84b;       /* in progress */
+    --maxw: 1200px;
+    /* IBM Plex is used if it is installed locally; nothing is downloaded */
+    --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
   }
 
-  /* ============ Reset / base ============ */
+  /* ============ Base ============ */
   *,*::before,*::after{ box-sizing: border-box; }
   html{ scroll-behavior: smooth; }
-  body{
-    margin:0;
-    background: radial-gradient(ellipse 1100px 560px at 50% -8%, rgba(70,224,138,0.07), transparent 60%), var(--bg);
-    color: var(--ink);
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    position: relative;
-  }
-  body::before{
-    content:""; position: fixed; inset:0;
-    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-    background-size: 26px 26px; opacity: .35; pointer-events: none; z-index: 0;
-  }
-  body::after{
-    content:""; position: fixed; inset:0;
-    background-image: repeating-linear-gradient(to bottom, rgba(230,236,232,0.025) 0px, rgba(230,236,232,0.025) 1px, transparent 1px, transparent 3px);
-    pointer-events: none; z-index: 0;
-  }
-  h1,h2,h3,h4{ margin: 0; font-weight: 600; letter-spacing: -0.01em; }
-  p{ margin: 0; }
-  ul{ margin:0; padding:0; list-style:none; }
-  a{ color: var(--ink); text-decoration: none; }
-  a:hover{ color: var(--accent); }
-  *:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  body{ margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  h1,h2,h3,h4,p{ margin: 0; }
+  ul{ margin: 0; padding: 0; list-style: none; }
+  a{ color: var(--cyan); }
+  a:hover{ color: #8fdde8; }
+  *:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }
+  .mono{ font-family: var(--font-mono); }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .skip-link{ position:absolute; left:-9999px; top:0; z-index:100; background: var(--accent); color: var(--bg); padding:10px 16px; }
+  .skip-link:focus{ left:16px; top:16px; }
+  [hidden]{ display: none !important; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior: auto; } .cursor{ animation: none !important; } }
 
-  .skip-link{ position:absolute; left:-9999px; top:0; z-index: 100; background: var(--accent); color:#06140d; padding:10px 16px; border-radius: 6px; }
-  .skip-link:focus{ left: 16px; top: 16px; }
-
-  .wrap{ max-width: var(--maxw); margin: 0 auto; padding: 0 24px; position: relative; z-index:1; }
-  .section{ padding: 72px 0; border-top: 1px solid var(--border); }
-  .hero.section{ border-top: none; }
-  @media (max-width: 720px){ .section{ padding: 48px 0; } .wrap{ padding: 0 16px; } }
-  .section-sub{ color: var(--muted); margin-top: 8px; max-width: 64ch; }
-
-  .eyebrow{ font-family: var(--font-mono); font-size: .78rem; letter-spacing: .04em; color: var(--accent); text-transform: lowercase; margin-bottom: 14px; }
-  .eyebrow::before{ content:"[ "; }
-  .eyebrow::after{ content:" ]"; }
+  /* ============ Shared building blocks ============ */
+  .wrap{ max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .section{ border-top: 1px solid var(--line-soft); }
+  .section.alt{ background: var(--bg-alt); }
+  .section > .wrap{ padding-top: 80px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 40px; }
+  .section-head{ display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
+  .eyebrow{ font-family: var(--font-mono); font-size: 13px; letter-spacing: .08em; color: var(--accent); }
+  .section h2{ font-size: 36px; line-height: 1.15; font-weight: 600; letter-spacing: -.01em; }
+  .section-sub{ color: var(--ink-3); font-size: 17px; }
+  .label{ font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; color: var(--muted-2); text-transform: uppercase; }
+  .card{ background: var(--surface); border: 1px solid var(--line); }
+  .chip{ font-family: var(--font-mono); font-size: 13px; padding: 5px 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 2px; color: var(--ink-2); }
+  .chips{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge{ font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border-radius: 2px; white-space: nowrap; border: 1px solid currentColor; }
+  .empty{ font-family: var(--font-mono); font-size: 13px; color: var(--muted-2); }
+  .btn{ text-decoration: none; padding: 13px 20px; border-radius: 2px; font-size: 15px; border: 1px solid var(--line-strong); color: var(--ink); }
+  .btn:hover{ color: var(--ink); border-color: var(--accent); }
+  .btn-primary{ background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+  .btn-primary:hover{ color: var(--bg); }
+  .btn-row{ display: flex; flex-wrap: wrap; gap: 12px; }
+  @media (max-width: 720px){ .section > .wrap{ padding-top: 56px; padding-bottom: 56px; } .section h2{ font-size: 28px; } }
 
   /* ============ Header ============ */
-  .site-header{ position: sticky; top:0; z-index: 50; background: rgba(10,13,12,0.82); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
-  .header-inner{ max-width: var(--maxw); margin:0 auto; padding: 16px 24px; display:flex; align-items:center; justify-content: space-between; gap: 16px; }
-  .brand{ display:flex; align-items:center; gap:8px; font-family: var(--font-mono); font-size: .92rem; color: var(--ink); }
-  .brand-mark{ color: var(--status-ok); font-size: .7rem; text-shadow: var(--glow-cyan); }
-  .header-nav{ display:flex; gap: 22px; font-size: .9rem; }
-  .header-nav a{ color: var(--muted); }
-  .header-nav a:hover{ color: var(--ink); }
-  @media (max-width: 760px){ .header-nav{ display:none; } }
+  .site-header{ border-bottom: 1px solid var(--line-soft); }
+  .header-inner{ max-width: var(--maxw); margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand{ display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: var(--font-mono); font-weight: 600; font-size: 15px; }
+  .brand:hover{ color: var(--ink); }
+  .brand-dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .brand-host{ color: var(--muted-2); font-weight: 400; }
+  .nav{ display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 14px; }
+  .nav a{ color: var(--ink-2); text-decoration: none; padding: 10px 12px; }
+  .nav a:hover{ color: var(--accent); }
+  .nav a.nav-cta{ border: 1px solid var(--accent); color: var(--accent); padding: 10px 16px; border-radius: 2px; margin-left: 8px; }
 
-  /* ============ Hero ============ */
-  .hero-inner{ display:grid; grid-template-columns: 1fr 290px; gap: 48px; padding-top: 64px; align-items: start; }
-  @media (max-width: 760px){ .hero-inner{ grid-template-columns: 1fr; gap: 32px; padding-top: 40px; } }
-  .hero h1{ font-size: clamp(1.6rem, 3.4vw, 2.3rem); line-height:1.25; margin-bottom: 18px; max-width: 24ch; }
-  .hero-lead{ color: var(--muted); font-size: 1.02rem; max-width: 54ch; margin-bottom: 26px; }
-  .hero-links{ display:flex; flex-wrap:wrap; gap: 22px; font-family: var(--font-mono); font-size: .88rem; }
-  .hero-links a{ border-bottom: 1px solid var(--border); padding-bottom: 2px; }
-  .hero-links a:hover{ border-color: var(--accent); }
+  /* ============ Intro (hero + dashboard) ============ */
+  .hero{ max-width: var(--maxw); margin: 0 auto; padding: 88px 24px 72px; display: flex; flex-wrap: wrap; gap: 56px; align-items: center; }
+  .hero-text{ flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+  .hero h1{ font-size: clamp(34px, 5vw, 56px); line-height: 1.08; font-weight: 600; letter-spacing: -.02em; }
+  .hero h1 .soft{ color: var(--muted); }
+  .hero-lead{ font-size: 19px; color: var(--ink-3); max-width: 620px; }
+  .dash{ flex: 1 1 360px; min-width: 0; position: relative; padding: 24px; font-family: var(--font-mono); font-size: 14px; }
+  .dash::before, .dash::after{ content: ""; position: absolute; width: 14px; height: 14px; }
+  .dash::before{ top: -1px; left: -1px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .dash::after{ bottom: -1px; right: -1px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+  .dash-head{ display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px dashed var(--line); color: var(--muted); }
+  .dash-state{ display: flex; align-items: center; gap: 8px; }
+  .dot{ width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+  .dash-rows{ display: grid; grid-template-columns: 120px minmax(0, 1fr); row-gap: 10px; column-gap: 12px; margin: 0; }
+  .dash-rows dt{ color: var(--muted-2); }
+  .dash-rows dd{ margin: 0; }
+  .cursor{ color: var(--accent); animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity: 0; } }
 
-  .status-panel{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; font-family: var(--font-mono); font-size: .82rem; }
-  .status-panel-head{ display:flex; align-items:center; gap:8px; margin-bottom: 16px; color: var(--muted); }
-  .status-panel-head strong{ color: var(--ink); font-weight: 600; }
-  .status-dot{ width:7px; height:7px; border-radius:50%; display:inline-block; flex-shrink:0; }
-  .status-dot--ok{ background: var(--status-ok); box-shadow: var(--glow-cyan), 0 0 0 3px var(--status-ok-soft); }
-  .status-dot--progress{ background: var(--accent); box-shadow: var(--glow-accent), 0 0 0 3px var(--accent-soft); }
-  .status-dot--todo{ background: transparent; border: 1px solid var(--status-todo); }
-  .status-rows{ margin:0; display:flex; flex-direction:column; gap:10px; }
-  .status-row{ display:flex; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--border); padding-top: 10px; }
-  .status-row:first-child{ border-top:none; padding-top:0; }
-  .status-row dt{ color: var(--muted); flex-shrink: 0; }
-  .status-row dd{ margin:0; color: var(--ink); text-align:right; }
-  .status-value .cursor{ display:inline-block; animation: blink 1.1s steps(1) infinite; color: var(--accent); text-shadow: var(--glow-accent); }
-  @keyframes blink{ 50%{ opacity:0; } }
-  @media (prefers-reduced-motion: reduce){ .status-value .cursor{ animation: none; } html{ scroll-behavior:auto; } }
-  .stack-row{ flex-direction: column; align-items: flex-start; }
-  .stack-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-  .chip{ font-family: var(--font-mono); font-size:.72rem; color: var(--muted); border:1px solid var(--border); background: var(--surface-2); padding: 2px 8px; border-radius: 4px; }
+  /* ============ 01 Stack ============ */
+  .stack{ display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch; }
+  .stack-list{ flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .stack-hint{ font-family: var(--font-mono); font-size: 12px; color: var(--muted-2); padding: 0 4px 4px; text-align: right; }
+  .layer-btn{ display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; cursor: pointer; font: inherit; color: var(--ink); padding: 18px 20px; border-radius: 2px; border: 1px solid var(--line); background: var(--surface); }
+  .layer-btn[aria-pressed="true"]{ border-color: var(--accent); background: #152027; }
+  .layer-n{ font-family: var(--font-mono); font-size: 13px; color: var(--muted-2); width: 24px; }
+  .layer-names{ display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+  .layer-name{ font-weight: 600; font-size: 17px; }
+  .layer-role{ font-size: 13px; color: var(--muted); }
+  .layer-panel{ flex: 999 1 480px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 28px; }
+  .panel-head{ display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .panel-head h3{ font-size: 28px; font-weight: 600; }
+  .panel-block{ display: flex; flex-direction: column; gap: 10px; }
+  .change{ display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+  .change-box{ flex: 1 1 200px; min-width: 0; padding: 16px; border: 1px dashed var(--line-strong); border-radius: 2px; color: var(--ink-3); }
+  .change-box.after{ border: 1px solid rgba(70,224,138,.4); background: rgba(70,224,138,.07); color: var(--ink); }
+  .change-arrow{ display: flex; align-items: center; color: var(--accent); font-family: var(--font-mono); }
+  .link-list{ display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+  .link-list a{ display: flex; align-items: center; gap: 14px; padding: 14px 4px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .link-list a:hover{ color: var(--accent); }
+  .kind{ font-family: var(--font-mono); font-size: 12px; width: 76px; flex-shrink: 0; color: var(--cyan); }
 
-  /* ============ Lists ============ */
-  .dash-list{ display:flex; flex-direction:column; gap:14px; margin-top: 22px; max-width: 66ch; }
-  .dash-list li{ position:relative; padding-left: 22px; color: var(--ink); font-size: .98rem; }
-  .dash-list li::before{ content:"–"; position:absolute; left:0; color: var(--accent); font-family: var(--font-mono); }
+  /* ============ 02 Proof ============ */
+  .proof-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 24px; }
+  .proof-card{ padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+  .proof-card h3{ font-size: 22px; font-weight: 600; }
+  .card-meta{ font-family: var(--font-mono); font-size: 12px; color: var(--muted-2); }
+  .trace-mini{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .step{ display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 2px; font-family: var(--font-mono); font-size: 12px; border: 1px solid var(--line-strong); color: var(--ink-2); }
+  .step small{ font-size: 11px; color: var(--muted); }
+  .step.cause{ border-color: var(--accent); background: rgba(70,224,138,.1); color: var(--accent); }
+  .step.cause small{ color: var(--accent); }
+  .step.skipped{ border-style: dashed; border-color: var(--line); color: var(--muted-2); }
+  .step.skipped small{ color: var(--muted-2); }
+  .case-dl{ margin: 0; display: grid; grid-template-columns: 96px minmax(0, 1fr); row-gap: 10px; column-gap: 16px; font-size: 15px; }
+  .case-dl dt{ font-family: var(--font-mono); font-size: 12px; color: var(--muted-2); padding-top: 3px; }
+  .case-dl dt.ok{ color: var(--accent); }
+  .case-dl dd{ margin: 0; color: var(--ink-2); }
+  .more{ font-family: var(--font-mono); font-size: 14px; text-decoration: none; color: var(--accent); }
 
-  /* ============ Learning path ============ */
-  .path{ margin-top: 28px; display:flex; flex-direction:column; gap: 12px; }
-  .module{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; }
-  .module summary{ list-style:none; cursor:pointer; padding: 16px 20px; display:flex; align-items:center; gap: 12px; flex-wrap: wrap; }
-  .module summary::-webkit-details-marker{ display:none; }
-  .module summary::marker{ content:""; }
-  .module-name{ font-weight: 600; flex: 1 1 auto; }
-  .module-meta{ font-family: var(--font-mono); font-size: .76rem; color: var(--muted); }
-  .bar{ width: 100%; height: 3px; background: var(--surface-2); border-radius: 2px; overflow:hidden; }
-  .bar > span{ display:block; height:100%; background: var(--accent); box-shadow: var(--glow-accent); }
-  .lessons{ padding: 4px 20px 18px; border-top: 1px solid var(--border); display:grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
-  @media (max-width: 600px){ .lessons{ grid-template-columns: 1fr; } }
-  .lesson{ display:flex; align-items:center; gap:10px; font-size: .9rem; padding-top: 10px; }
-  .lesson-num{ font-family: var(--font-mono); font-size: .76rem; color: var(--muted); width: 22px; flex-shrink:0; }
-  .lesson.todo .lesson-title{ color: var(--muted); }
-  .lesson-flag{ font-family: var(--font-mono); font-size: .7rem; color: var(--accent); margin-left: auto; }
+  /* ============ 03 Working log ============ */
+  .log-head{ display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px; }
+  .grid-wrap{ display: flex; flex-direction: column; gap: 8px; }
+  .grid-cap{ display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--muted-2); }
+  .activity{ display: grid; grid-template-rows: repeat(7, 12px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 4px; }
+  .activity span{ width: 12px; height: 12px; border-radius: 2px; }
+  .table-scroll{ overflow-x: auto; }
+  .log-table{ width: 100%; min-width: 640px; border-collapse: collapse; font-size: 15px; }
+  .log-table th{ text-align: left; font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--muted-2); padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .log-table td{ padding: 14px 20px; border-bottom: 1px solid var(--line-soft); }
+  .log-table td.m{ font-family: var(--font-mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .log-table td.k{ font-family: var(--font-mono); font-size: 13px; color: var(--cyan); }
+  .log-table a{ color: var(--ink); text-decoration: none; }
+  .log-table a:hover{ color: var(--accent); }
 
-  /* ============ System ============ */
-  .sys-table{ width:100%; border-collapse: collapse; margin-top: 26px; font-size: .9rem; }
-  .sys-table th, .sys-table td{ text-align:left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  .sys-table th{ font-family: var(--font-mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); font-weight: 600; }
-  .sys-table td:first-child{ font-family: var(--font-mono); color: var(--muted); white-space: nowrap; }
-  .table-scroll{ overflow-x:auto; }
+  /* ============ 04 How I work ============ */
+  .habits{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; }
+  .habit{ border-top: 2px solid var(--accent); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .habit h3{ font-size: 20px; font-weight: 600; }
+  .habit p{ color: var(--ink-3); }
 
-  .roadmap{ margin-top: 30px; display:flex; flex-direction:column; gap: 0; border-left: 1px solid var(--border); margin-left: 4px; }
-  .stage{ position:relative; padding: 0 0 18px 22px; }
-  .stage .status-dot{ position:absolute; left:-4px; top: 8px; }
-  .stage-title{ font-weight: 600; font-size: .96rem; }
-  .stage-text{ color: var(--muted); font-size: .9rem; }
-  .stage-tag{ font-family: var(--font-mono); font-size: .72rem; color: var(--muted); margin-left: 8px; }
+  /* ============ 05 Contact ============ */
+  .contact{ flex-direction: row !important; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 32px; }
 
-  /* ============ Sessions feed ============ */
-  .sessions-feed{ margin-top: 30px; display:flex; flex-direction:column; gap: 14px; }
-  .entry{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow:hidden; }
-  .entry summary{ list-style:none; cursor:pointer; padding: 20px 22px; }
-  .entry summary::-webkit-details-marker{ display:none; }
-  .entry summary::marker{ content:""; }
-  .entry-meta{ display:flex; align-items:center; flex-wrap:wrap; gap: 10px; font-family: var(--font-mono); font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
-  .entry-title{ font-size: 1.12rem; margin-bottom: 8px; }
-  .entry-lead{ color: var(--muted); font-size: .96rem; max-width: 64ch; }
-  .entry-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top: 14px; }
-  .entry-toggle{ display:inline-flex; align-items:center; gap:6px; margin-top: 16px; font-family: var(--font-mono); font-size: .8rem; color: var(--accent); }
-  .chevron{ display:inline-block; transition: transform .15s ease; }
-  .entry[open] .chevron, .module[open] .chevron{ transform: rotate(90deg); }
-  @media (prefers-reduced-motion: reduce){ .chevron{ transition:none; } }
-
-  .entry-body{ padding: 0 22px 26px; border-top: 1px solid var(--border); }
-  .entry-field{ padding-top: 20px; }
-  .entry-field h4{ font-family: var(--font-mono); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin-bottom: 10px; font-weight: 600; }
-  .entry-field ul{ display:flex; flex-direction:column; gap:8px; }
-  .entry-field li{ position:relative; padding-left:16px; color: var(--ink); font-size: .94rem; }
-  .entry-field li::before{ content:"·"; position:absolute; left:0; color: var(--muted); }
-  .entry-evidence pre{ background: var(--surface-2); border:1px solid var(--border); border-radius: 6px; padding: 14px 16px; overflow-x:auto; margin:0; }
-  .entry-evidence code{ font-family: var(--font-mono); font-size: .82rem; color: var(--ink); white-space: pre; }
+  /* ============ Session detail view (#session/<id>) ============ */
+  .detail{ max-width: var(--maxw); margin: 0 auto; padding: 64px 24px 96px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; }
+  .detail-main{ flex: 999 1 620px; min-width: 0; display: flex; flex-direction: column; gap: 40px; }
+  .detail-side{ flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+  .detail h1{ font-size: clamp(30px, 4.4vw, 46px); line-height: 1.1; font-weight: 600; letter-spacing: -.02em; }
+  .tagline{ display: flex; flex-wrap: wrap; gap: 10px; }
+  .tag{ font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border: 1px solid var(--line-strong); color: var(--muted); border-radius: 2px; }
+  .tag.kind-tag{ color: var(--cyan); }
+  .trace{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .trace .step{ padding: 14px; gap: 6px; font-size: 14px; }
+  .trace .step .note{ font-family: var(--font-sans); font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .term{ background: #070a0c; border: 1px solid var(--line); border-radius: 2px; overflow-x: auto; }
+  .term-bar{ padding: 10px 16px; border-bottom: 1px solid var(--line-soft); font-family: var(--font-mono); font-size: 12px; color: var(--muted-2); }
+  .term pre{ margin: 0; padding: 20px; font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--ink-2); white-space: pre; }
+  .term .prompt{ color: var(--accent); }
+  .case-cards{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+  .case-cards .card{ padding: 22px; display: flex; flex-direction: column; gap: 8px; color: var(--ink-2); }
+  .case-cards .card.ok{ border-color: rgba(70,224,138,.4); color: var(--ink); }
+  .case-cards .card.ok .card-meta{ color: var(--accent); }
+  .field ul{ display: flex; flex-direction: column; gap: 8px; }
+  .field li{ position: relative; padding-left: 16px; color: var(--ink-2); }
+  .field li::before{ content: "·"; position: absolute; left: 0; color: var(--muted); }
+  .side-card{ padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .layer-bar{ display: flex; gap: 4px; }
+  .layer-bar span{ flex: 1; height: 4px; background: var(--line); }
+  .layer-bar span.on{ background: var(--accent); }
 
   /* ============ Footer ============ */
-  .site-footer{ border-top: 1px solid var(--border); padding: 32px 0 48px; position: relative; z-index: 1; }
-  .site-footer p{ color: var(--muted); font-family: var(--font-mono); font-size: .8rem; text-align:center; padding: 0 16px; }
+  .site-footer{ border-top: 1px solid var(--line-soft); }
+  .footer-inner{ max-width: var(--maxw); margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 13px; color: var(--muted-2); }
+  .footer-inner a{ color: var(--muted); }
 </style>
 </head>
 <body>
-<a class="skip-link" href="#sessions">Skip to Working Sessions</a>
+<a class="skip-link" href="#log">Skip to the working log</a>
 
+<!-- ============ HEADER: brand + navigation (static) ============ -->
 <header class="site-header">
   <div class="header-inner">
-    <a class="brand" href="#top"><span class="brand-mark">●</span><span id="brand-name">velislav</span></a>
-    <nav class="header-nav">
-      <a href="#sessions">Working Sessions</a>
-      <a href="#system">System</a>
-      <a href="#path">Learning Path</a>
-      <a href="#blog">Blog</a>
+    <a class="brand" href="#top"><span class="brand-dot"></span><span><span id="brand-name">velislav</span><span class="brand-host" id="brand-host"></span></span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#stack">stack</a>
+      <a href="#proof">proof</a>
+      <a href="#log">log</a>
+      <a href="#how">how I work</a>
+      <a class="nav-cta" href="#contact">contact</a>
     </nav>
   </div>
 </header>
 
-<main id="top">
+<!-- ============ LANDING VIEW: intro + sections 01–05 ============ -->
+<main id="landing">
 
-  <!-- ============ HERO ============ -->
-  <section class="hero section" id="about">
-    <div class="wrap hero-inner">
-      <div class="hero-text">
-        <p class="eyebrow">developer → tester → application manager → linux</p>
-        <h1>Linux working log: what I built, what broke, how I fixed it.</h1>
-        <p class="hero-lead">My portfolio. Every entry is real work on my own systems, with evidence. The story behind it is on my blog and on LinkedIn.</p>
-        <div class="hero-links" id="hero-links"></div>
+  <!-- INTRO: eyebrow, title, intro text, links (left) + dashboard (right) -->
+  <section class="hero" id="top">
+    <div class="hero-text">
+      <p class="eyebrow" id="hero-eyebrow"></p>
+      <h1 id="hero-title"></h1>
+      <p class="hero-lead" id="hero-lead"></p>
+      <div class="btn-row" id="hero-links"></div>
+    </div>
+    <aside class="dash card" aria-label="Status">
+      <div class="dash-head">
+        <span id="dash-cmd"></span>
+        <span class="dash-state" style="color: var(--accent)"><span class="dot"></span><span id="dash-state"></span></span>
       </div>
-      <aside class="status-panel" aria-label="Status">
-        <div class="status-panel-head">
-          <span class="status-dot status-dot--ok"></span>
-          <span>whoami → <strong>velislav</strong></span>
+      <dl class="dash-rows" id="dash-rows"></dl>
+    </aside>
+  </section>
+
+  <!-- 01 · THE STACK: layer list (left) + selected layer panel (right) -->
+  <section class="section alt" id="stack">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">[ 01 · the stack ]</p>
+        <h2 id="stack-title"></h2>
+        <p class="section-sub" id="stack-sub"></p>
+      </div>
+      <div class="stack">
+        <div class="stack-list">
+          <div class="stack-hint">↑ up the stack</div>
+          <div id="stack-list" style="display:flex; flex-direction:column; gap:8px"></div>
         </div>
-        <dl class="status-rows">
-          <div class="status-row"><dt>status</dt><dd class="status-value"><span class="sr-only" id="status-full"></span><span id="status-typed" aria-hidden="true"></span><span class="cursor" aria-hidden="true">_</span></dd></div>
-          <div class="status-row"><dt>started</dt><dd id="started-value">—</dd></div>
-          <div class="status-row"><dt>uptime</dt><dd id="uptime-value">—</dd></div>
-          <div class="status-row"><dt>module</dt><dd id="module-value">—</dd></div>
-          <div class="status-row"><dt>workstation</dt><dd>Fedora Sway Atomic</dd></div>
-          <div class="status-row"><dt>homelab</dt><dd>Raspberry Pi 5 · Ubuntu Server</dd></div>
-          <div class="status-row"><dt>kubecraft</dt><dd id="community-value">—</dd></div>
-          <div class="status-row"><dt>target</dt><dd>Linux System Eng. → DevOps</dd></div>
-          <div class="status-row stack-row"><dt>learning path</dt>
-            <dd class="stack-chips">
-              <span class="chip">linux</span><span class="chip">git</span><span class="chip">bash</span><span class="chip">containers</span><span class="chip">kubernetes</span>
-            </dd>
-          </div>
-        </dl>
-      </aside>
-    </div>
-  </section>
-
-  <!-- ============ SESSIONS ============ -->
-  <section class="section" id="sessions">
-    <div class="wrap">
-      <h2>Working Sessions</h2>
-      <p class="section-sub">Newest first. Every entry comes from my notes: learning notes (why it works), runbooks (steps for a task) and the daily log (what happened). Troubleshooting bottom-up: file → permission → program → config → input → exit code / logs.</p>
-      <div class="sessions-feed" id="sessions-feed"></div>
-    </div>
-  </section>
-
-  <!-- ============ SYSTEM ============ -->
-  <section class="section" id="system">
-    <div class="wrap">
-      <h2>The system</h2>
-      <p class="section-sub">What I run and use today. The portfolio itself is treated as a real workload on this system.</p>
-      <div class="table-scroll">
-        <table class="sys-table" id="sys-table"></table>
+        <div class="layer-panel card" id="layer-panel" aria-live="polite"></div>
       </div>
-
-      <h3 style="margin-top:44px">This portfolio as a workload — roadmap</h3>
-      <p class="section-sub">The same application moves through every layer of the learning path. Each move becomes a log entry and a runbook.</p>
-      <div class="roadmap" id="roadmap"></div>
     </div>
   </section>
 
-  <!-- ============ LEARNING PATH ============ -->
-  <section class="section" id="path">
+  <!-- 02 · PROOF: one card per published session that has a `case` -->
+  <section class="section" id="proof">
     <div class="wrap">
-      <h2>Learning path</h2>
-      <p class="section-sub">Each module builds on the one before it. Every lesson gets a learning note, and is applied in the homelab as soon as possible.</p>
-      <div class="path" id="path-list"></div>
+      <div class="section-head">
+        <p class="eyebrow">[ 02 · proof ]</p>
+        <h2 id="proof-title"></h2>
+        <p class="section-sub" id="proof-sub"></p>
+      </div>
+      <div class="proof-grid" id="proof-grid"></div>
     </div>
   </section>
 
-  <!-- ============ BLOG ============ -->
-  <section class="section" id="blog">
+  <!-- 03 · WORKING LOG: activity grid (last 16 weeks) + table of published sessions -->
+  <section class="section alt" id="log">
     <div class="wrap">
-      <h2>Blog</h2>
-      <p class="section-sub">The story behind the log: why Linux, what I'm learning, and what it means for me.</p>
-      <p class="section-sub">First posts coming soon.</p>
+      <div class="log-head">
+        <div class="section-head" style="max-width:620px">
+          <p class="eyebrow">[ 03 · working log ]</p>
+          <h2 id="log-title"></h2>
+          <p class="section-sub" id="log-sub"></p>
+        </div>
+        <div class="grid-wrap">
+          <div class="grid-cap"><span>last 16 weeks</span><span id="grid-count"></span></div>
+          <div class="activity" id="activity" role="img"></div>
+        </div>
+      </div>
+      <div class="table-scroll card">
+        <table class="log-table">
+          <thead><tr><th scope="col">date</th><th scope="col">type</th><th scope="col">layer</th><th scope="col">entry</th></tr></thead>
+          <tbody id="log-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-      <h3 style="margin-top:44px">Background</h3>
-      <ul class="dash-list" id="bg-list"></ul>
+  <!-- 04 · HOW I WORK: habit cards -->
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">[ 04 · how I work ]</p>
+        <h2 id="how-title"></h2>
+        <p class="section-sub" id="how-sub"></p>
+      </div>
+      <div class="habits" id="habits"></div>
+    </div>
+  </section>
+
+  <!-- 05 · CONTACT: heading, one line, contact buttons -->
+  <section class="section alt" id="contact">
+    <div class="wrap contact">
+      <div class="section-head" style="max-width:620px">
+        <p class="eyebrow">[ 05 · contact ]</p>
+        <h2 id="contact-title"></h2>
+        <p class="section-sub" id="contact-sub"></p>
+      </div>
+      <div class="btn-row" id="contact-links"></div>
     </div>
   </section>
 
 </main>
 
+<!-- ============ DETAIL VIEW: one working session, filled from `sessions` (#session/<id>) ============ -->
+<main id="detail" hidden></main>
+
+<!-- ============ FOOTER ============ -->
 <footer class="site-footer">
-  <p>Written in Obsidian · versioned in Git · deployed to Cloudflare on every push.</p>
+  <div class="footer-inner">
+    <span id="footer-text"></span>
+    <span id="footer-link"></span>
+  </div>
 </footer>
 
 <script>
-/* =========================================================
-   CONFIG
-   ========================================================= */
+/* #########################################################
+   DATA: edit only this part
+   ######################################################### */
+
+/* ---------- CONFIG: dates and links. null = hidden on the page ---------- */
 const CONFIG = {
   handle: "velislav",
-  startDate: "2026-03",      // first day on the Pi with Ubuntu Server. "YYYY-MM" or "YYYY-MM-DD"
-  communitySince: "2026-06", // joined the KubeCraft community
+  host: "@homelab:~",          // shown after the name in the header
+  startDate: "2026-03",        // first day on the Pi with Ubuntu Server ("YYYY-MM" or "YYYY-MM-DD")
+  communitySince: "2026-06",   // joined KubeCraft
+  lastDeploy: null,            // e.g. { hash: "abc1234", date: "2026-11-20" }. Row hidden while null.
   links: {
-    cv: null,                // URL to CV (PDF). Hidden while null.
-    linkedin: "https://www.linkedin.com/in/vtonkov/",
-    github: "https://github.com/adminabyas",
-    blog: "#blog"
+    linkedin: "https://www.linkedin.com/in/velislavv/",
+    github: null,              // stays null until the homelab repo is clean (claim rules)
+    cv: null,                  // URL to the CV (PDF)
+    email: null,               // e.g. "name@example.com" (shown as "Email me")
+    source: null               // repo URL for "view source →" in the footer
   }
 };
 
-/* =========================================================
-   TEXT
-   ========================================================= */
+/* ---------- TEXT: every visible sentence on the landing view ---------- */
+/* Step 1 (Intro) and later steps finalise these. */
 const TEXT = {
-  status_prefix: "actively",
-  status_words: ["learning", "exploring", "adapting", "building", "documenting"],
-  status_full: "actively learning, exploring, adapting, building, documenting",
-  bg: [
-    "Path: developer, tester, application manager. Now Linux.",
-    "Most recently ICT Application Manager: build & run for around 20 business-critical applications (about 60 % run, 40 % build / system engineering).",
-    "Structured learning path via the KubeCraft Career Accelerator (since June 2026), applied hands-on on my own systems.",
-    "Certification: ISTQB Certified Tester Foundation Level 4.0, exam scheduled for February 2027."
-  ]
+  eyebrow: "[ developer → tester → application manager → linux ]",
+  title: "Linux working log:",
+  titleSoft: "what I built, what broke, how I fixed it.",   // second line, lighter colour
+  lead: "My portfolio. Every entry is real work on my own systems, with evidence. The story behind it is on my blog and on LinkedIn.",
+  ctaPrimary: "See the stack →",                            // first button, jumps to 01
+
+  // Dashboard (right side of the intro)
+  dashCommand: "$ systemctl status portfolio",
+  dashState: "active",
+  // Rows, top to bottom. Either a fixed value, or `compute` for a value worked out from DATA:
+  //   "layer"   → current layer from `stack`        "entries"  → published logs / runbooks / notes
+  //   "started" → CONFIG.startDate as month          "uptime"   → months since startDate
+  //   "kubecraft" → since CONFIG.communitySince      "deploy"   → CONFIG.lastDeploy (hidden while null)
+  //   "status"  → typed status words (statusPrefix + statusWords)
+  dashboard: [
+    { label: "workload",    value: "portfolio (this site)" },
+    { label: "layer",       compute: "layer" },
+    { label: "last deploy", compute: "deploy" },
+    { label: "entries",     compute: "entries" },
+    { label: "host",        value: "Raspberry Pi 5 · Ubuntu Server" },
+    { label: "workstation", value: "Fedora Sway Atomic" },
+    { label: "target",      value: "Linux System Eng. → DevOps" }
+  ],
+  statusPrefix: "actively",
+  statusWords: ["learning", "exploring", "adapting", "building", "documenting"],
+
+  // Section headings and sub-lines
+  stackTitle: "One workload, five layers",
+  stackSub: "",
+  proofTitle: "What broke, and how I found it",
+  proofSub: "I troubleshoot bottom-up: file → permission → program → config → input → exit code / logs. Each case shows where the cause turned up.",
+  logTitle: "Working log",
+  logSub: "Newest first, published from my notes. Learning notes explain why, runbooks list the steps, and the daily log records what happened.",
+  howTitle: "How I work",
+  howSub: "",
+  habits: [],                 // { title: "…", text: "…" } — filled in step 5
+  contactTitle: "Contact",
+  contactSub: "",
+  contactEmailLabel: "Email me",
+
+  emptyEntries: "no entries published yet",
+  footer: "written in Obsidian · versioned in Git · deployed to Cloudflare on every push"
 };
 
-/* =========================================================
-   LEARNING PATH
-   state: "done" | "progress" | "next" | "todo"
-   Status panel "module" = first lesson in "progress" or "next".
-   ========================================================= */
-const modules = [
-  {
-    icon: "🔴", name: "Securely manage a Linux system",
-    lessons: [
-      ["01", "Linux — learning-path note", "done"],
-      ["01", "Linux — system reference note", "done"],
-      ["02", "Installation", "progress"],
-      ["03", "Login", "todo"],
-      ["04", "Shell, Command Line & Terminal Fundamentals", "todo"],
-      ["05", "Commands", "todo"],
-      ["06", "Installing Software", "todo"],
-      ["07", "The File System", "todo"],
-      ["08", "Viewing and Manipulating Files", "todo"],
-      ["09", "Users, Groups and Permissions", "todo"],
-      ["10", "Vi(m) Basics", "todo"],
-      ["11", "Input/Output & Pipes", "todo"],
-      ["12", "Processes", "todo"],
-      ["13", "SSH", "todo"],
-      ["14", "Tmux", "todo"],
-      ["15", "Dotfiles & Customization", "todo"],
-      ["16", "Outro", "todo"]
-    ]
-  },
-  { icon: "🟠", name: "Git Fundamentals", lessons: [] },
-  {
-    icon: "🟡", name: "Bash Scripting",
-    lessons: [
-      ["01", "Variables", "todo"],
-      ["02", "Parameter Expansion", "todo"],
-      ["03", "If Statements (Conditionals)", "todo"],
-      ["04", "Loops", "todo"],
-      ["05", "Arrays and Functions", "todo"],
-      ["06", "Filters in Vi", "todo"],
-      ["07", "Outro", "todo"]
-    ]
-  },
-  {
-    icon: "🟢", name: "Containers",
-    lessons: [
-      ["01", "Intro", "todo"],
-      ["02", "Installation & First Steps", "todo"],
-      ["03", "Container Lifecycle Management", "todo"],
-      ["04", "Building Docker Images — Dockerfiles", "todo"],
-      ["05", "Security and Container Best Practices", "todo"],
-      ["06", "Docker Compose and Capstone Project", "todo"]
-    ]
-  },
-  { icon: "🟣", name: "Kubernetes", lessons: [] }
+/* ---------- STACK: five layers, bottom (1) to top (5) ----------
+   state: "queued" | "progress" | "shipped"  (move only with a published proof)
+   covers: topics this layer covers (not skills)
+   before / after: what changes in how this site runs. Block hidden while empty.
+   Proof links are computed: published sessions with the same `layer` number. */
+const stack = [
+  { n: 1, name: "Linux",      role: "The host",       state: "progress", covers: [], before: "", after: "" },
+  { n: 2, name: "Git",        role: "Change history", state: "progress", covers: [], before: "", after: "" },
+  { n: 3, name: "Bash",       role: "Automation",     state: "queued",   covers: [], before: "", after: "" },
+  { n: 4, name: "Containers", role: "Packaging",      state: "queued",   covers: [], before: "", after: "" },
+  { n: 5, name: "Kubernetes", role: "Orchestration",  state: "queued",   covers: [], before: "", after: "" }
 ];
 
-/* =========================================================
-   SYSTEM
-   draft: true = kept in the source, not shown on the page
-   ========================================================= */
-const system = [
-  { key: "workstation", what: "Fedora Sway Atomic", notes: "Daily system." },
-  { key: "server", what: "Raspberry Pi 5 · Ubuntu Server", notes: "Homelab node, reachable over SSH." },
-  { key: "notes", what: "Obsidian vault “the_system”", notes: "All learning notes, runbooks and log entries. Versioned in Git." },
-  { key: "sync", what: "Git → GitHub over SSH", notes: "Dedicated key per repo via a host alias in ~/.ssh/config (IdentitiesOnly yes).", draft: true },
-  { key: "terminal", what: "foot · bash · vi(m)", notes: "vi(m) as the only editor — available on every server and in minimal images." },
-  { key: "backup", what: "Proton Drive · external SSD", notes: "Cloud backup plus an external 1 TB SSD (Crucial X10 Pro)." },
-  { key: "portfolio", what: "This page", notes: "Single HTML file in a public GitHub repo, deployed to Cloudflare on every push." }
-];
+/* ---------- SESSIONS: working sessions, one per chosen vault note ----------
+   Template (copy, fill, remove what you don't need):
+   {
+     id: "short-slug", date: "YYYY-MM-DD", status: "done",      // or "progress"; draft: true = hidden
+     kind: "log",                       // "log" | "runbook" | "note"
+     layer: 1,                          // 1–5 from `stack`, or null
+     env: "workstation",                // terminal label: "workstation" | "homelab"
+     time: "2 h 12 min",                // optional
+     hash: null,                        // commit hash, optional
+     tags: ["topic=…"],
+     title: "Problem or task, in plain words",
+     summary: "One or two sentences: what happened, what I did.",
+     trace: { found: 1, notes: ["file …", "permission …", "program …", "config …", "input …", "exit code / logs …"] },
+                                        // optional; found = index 0–5 of the step where the cause was
+     case: { symptom: "…", cause: "…", fix: "…", verified: "…" },   // optional → Proof card
+     learned: [], encountered: [], solved: [], result: [], next: [],
+     topics: [],                        // side-panel chips
+     related: [],                       // ids of other sessions
+     evidence: "$ command\noutput"      // real output; nothing private (user name, hostnames, IPs, keys)
+   } */
+const sessions = [];
 
-/* state: "done" | "progress" | "todo" */
-const roadmap = [
-  ["done",     "Prototype",           "Single HTML file, content from the log.", "—"],
-  ["done", "Public on Cloudflare", "Public GitHub repo; every push to main deploys the site.", "⚙️"],
-  ["todo",     "Custom domain",       "Own domain, DNS and TLS.", "🌐"],
-  ["todo",     "Markdown + Hugo",     "Entries written in Obsidian as Markdown; the site is built from them.", "📝"],
-  ["todo",     "Served from the Pi",  "nginx on Ubuntu Server, SSH hardening, firewall, systemd, logs. Local network first.", "🔴"],
-  ["todo",     "Scripts",             "Deploy and backup scripts with exit codes, run by a systemd timer.", "🟡"],
-  ["todo",     "Container",           "Dockerfile (non-root, minimal base image), Docker Compose.", "🟢"],
-  ["todo",     "CI/CD",               "GitHub Actions: on push → build → check → deploy.", "⚙️"],
-  ["todo",     "Kubernetes",          "Deployment, Service, Ingress with TLS on k3s. Rollouts and rollbacks.", "🟣"],
-  ["todo",     "Public & operated",   "Exposed safely (tunnel, TLS), monitoring and alerts, backups, runbooks.", "📈"]
-];
 
-/* =========================================================
-   WORKING SESSIONS
-   date: "YYYY-MM-DD" or null · hash: commit hash or null (hidden)
-   draft: true = kept in the source, not shown on the page
-   Fields: done, learned, encountered, solved, result, next, evidence
-   ========================================================= */
-const sessions = [
-  {
-    id: "external-ssd", date: "2026-10-28", hash: null, status: "done",
-    tags: ["topic=linux", "lesson=07/08", "env=workstation"],
-    title: "Finding and recovering files from an external SSD",
-    summary: "The external SSD was plugged in but didn't show up by name. Identified it with lsblk, mounted it read-only, searched it with find/grep and copied the portfolio prototype into my documents.",
-    learned: [
-      "lsblk shows every disk and partition; an empty MOUNTPOINTS column means the drive is connected but not mounted",
-      "Mounting read-only (-o ro) is the safe way to inspect a disk — nothing can be changed by accident",
-      "find searches by file name, grep -r searches file contents — together they find a file even without knowing its exact name",
-      "Paths with spaces must be quoted, and 2>/dev/null hides permission errors (stderr)"
-    ],
-    encountered: [
-      "The SSD's name (X10) was visible before, but not anymore",
-      "Didn't know the exact file name of the prototype"
-    ],
-    solved: [
-      "Identified the SSD as sdb (931.5G); the data partition is sdb2",
-      "Mounted it manually, read-only, to /mnt/ssd",
-      "Searched by name with find -iname and copied both files with cp -iv into ~/Documents/portfolio"
-    ],
-    result: ["Prototype recovered — it's this page."],
-    next: ["Write a runbook: “Mount and search an external drive”", "Unmount before unplugging: sudo umount /mnt/ssd"],
-    evidence: "$ lsblk -o NAME,SIZE,MOUNTPOINTS\nsdb           931.5G\n├─sdb1           16M\n└─sdb2        931.5G\n\n$ sudo mount -o ro /dev/sdb2 /mnt/ssd\n$ find /mnt/ssd -iname \"*prototype*\" 2>/dev/null\n$ cp -iv <found files> ~/Documents/portfolio/"
-  },
-  {
-    id: "doc-system", date: "2026-10-28", hash: null, status: "progress", draft: true,
-    tags: ["topic=documentation", "module=linux", "env=obsidian"],
-    title: "Building the documentation system",
-    summary: "Defined how every lesson is documented: two learning notes per module (learning path + system reference), separate runbooks, and a daily log that feeds this page.",
-    learned: [
-      "Learning notes, runbooks and log entries serve different purposes — mixed together they become hard to search",
-      "A runbook named after the problem (“SSH key rejected by GitHub”) is found the moment the problem happens",
-      "How each part of the learning path maps to real DevOps tasks"
-    ],
-    encountered: ["Notes were growing without a structure that scales"],
-    solved: [
-      "Split into notes/, runbooks/ and log/ with a fixed template for each",
-      "Runbook template: Symptom → Check → Cause → Fix → Verify → Prevent",
-      "Wrote the first two notes for module 01: “Linux — learning path” and “Linux — the system and how it is used”"
-    ],
-    result: ["Module 01 notes written; templates in place."],
-    next: ["Create the GitHub repo with this folder structure"],
-    evidence: "homelab/\n├── notes/       # learning: the why\n├── runbooks/    # tasks: the steps\n└── log/         # daily: what happened"
-  },
-  {
-    id: "ssh-alias", date: "2026-10-27", hash: null, status: "progress", draft: true,
-    tags: ["topic=ssh", "topic=git", "lesson=13", "env=workstation"],
-    title: "SSH push/pull failing — Permission denied (publickey)",
-    summary: "git pull and git push to my vault's GitHub repo failed while git status said “up to date”. Traced it bottom-up to a host alias using a key GitHub didn't know.",
-    learned: [
-      "git status only compares with the last fetch — it never contacts GitHub",
-      "A remote can point to an SSH host alias instead of github.com; the alias decides which key is used",
-      "IdentitiesOnly yes means only the configured key is offered — no fallback to other keys"
-    ],
-    encountered: ["git pull / git push → Permission denied (publickey)"],
-    solved: [
-      "Account key works: ssh -T git@github.com → “Hi …!”",
-      "Remote uses the alias github-the_system → ~/.ssh/config points it to id_ed25519_the_system",
-      "ssh -T git@github-the_system → Permission denied: that key was never added to GitHub"
-    ],
-    result: ["Root cause found. Fix pending."],
-    next: ["Add fix + verification", "Write runbook: “SSH key rejected by GitHub”"],
-    evidence: "$ git remote -v\norigin  git@github-the_system:<user>/the_system.git\n\n$ grep -A5 \"github-the_system\" ~/.ssh/config\n  IdentityFile ~/.ssh/id_ed25519_the_system\n  IdentitiesOnly yes\n\n$ ssh -T git@github-the_system\nPermission denied (publickey)."
-  },
-  {
-    id: "pi5-setup", date: null, hash: null, status: "done", draft: true,
-    tags: ["topic=linux", "env=homelab", "hw=raspberry-pi-5"],
-    title: "Raspberry Pi 5 homelab — first setup with Ubuntu Server",
-    summary: "Set up the first homelab node: Ubuntu Server on a Raspberry Pi 5, remote access over SSH, and the basics of working on a headless server.",
-    learned: ["Navigating the filesystem on a headless server", "Connecting over SSH", "Monitoring the board temperature"],
-    encountered: ["Display/console issues"],
-    solved: [],
-    result: ["Pi 5 running Ubuntu Server, reachable over SSH."],
-    next: ["SSH hardening (keys only, no root login)", "Serve this portfolio with nginx from the Pi"],
-    evidence: ""
-  },
-  {
-    id: "endeavouros", date: null, hash: null, status: "done", draft: true,
-    tags: ["topic=linux", "lesson=02", "env=workstation"],
-    title: "Moving my workstation from Windows 11 to EndeavourOS",
-    summary: "Replaced Windows 11 with EndeavourOS as my daily system.",
-    learned: [
-      "Why EndeavourOS: a vanilla Arch base, so ArchWiki applies directly",
-      "Pre-install checks: encryption, boot menu, backup plan",
-      "Wine is a translation layer, not a VM — that matters for troubleshooting"
-    ],
-    encountered: [], solved: [], result: [], next: [], evidence: ""
-  },
-  {
-    // Entry zero — the very first log entry. Kept last so it sits at the bottom of the feed.
-    id: "preparation", date: null, hash: null, status: "done", draft: true,
-    tags: ["topic=installation", "topic=backup", "module=linux"],
-    title: "Before the first install: backup, preparation, documentation",
-    summary: "Entry zero. Before changing anything, I secured my data and prepared the hardware: a full backup of my Windows laptop to an external SSD, a copy of everything on a cloud drive, an external drive prepared for Ubuntu on the Raspberry Pi 5, and documentation from the very first step.",
-    done: [
-      "Backed up the Windows laptop to the external SSD",
-      "Copied everything to a cloud drive and synced it",
-      "Prepared the external drive for Ubuntu on the Raspberry Pi 5",
-      "Started documenting from the first step"
-    ],
-    learned: [], encountered: [],
-    result: ["My data was in two places before I touched the laptop."],
-    next: ["Install Ubuntu Server on the Pi 5", "Replace Windows on the laptop"],
-    evidence: ""
-  }
-];
+/* #########################################################
+   RENDERING: builds the page from DATA. Normally no changes needed.
+   ######################################################### */
 
-/* =========================================================
-   RENDERING
-   ========================================================= */
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const published = list => list.filter(item => !item.draft);
+// Escape text before it goes into HTML (no data can break the page or inject code)
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = id => document.getElementById(id);
+const published = list => list.filter(x => !x.draft);
+const STEPS = ["file", "permission", "program", "config", "input", "exit code / logs"];
+const STATE = {
+  shipped:  { label: "shipped",     color: "var(--accent)" },
+  progress: { label: "in progress", color: "var(--amber)" },
+  queued:   { label: "queued",      color: "var(--muted-2)" }
+};
 
-function renderLinks(){
-  const L = CONFIG.links;
-  const items = [["CV", L.cv], ["LinkedIn", L.linkedin], ["GitHub", L.github], ["Blog", L.blog]];
-  document.getElementById("hero-links").innerHTML = items.filter(([, url]) => url).map(([label, url]) =>
-    url.startsWith("#") ? `<a href="${esc(url)}">${esc(label)}</a>`
-                        : `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>`
-  ).join("");
-}
-
-function renderBackground(){
-  document.getElementById("bg-list").innerHTML = TEXT.bg.map(t => `<li>${esc(t)}</li>`).join("");
-}
-
-function dotFor(state){
-  return state === "done" ? "status-dot--ok" : (state === "progress" || state === "next") ? "status-dot--progress" : "status-dot--todo";
-}
-
-function renderPath(){
-  const wrap = document.getElementById("path-list");
-  wrap.innerHTML = "";
-  modules.forEach((m, i) => {
-    const total = m.lessons.length;
-    const done = m.lessons.filter(l => l[2] === "done").length;
-    const pct = total ? Math.round(done / total * 100) : 0;
-    const active = m.lessons.some(l => l[2] !== "todo");
-    const d = document.createElement("details");
-    d.className = "module";
-    if (i === 0) d.open = true;
-    const meta = total ? `${done}/${total} lessons` : "lesson list to be added";
-    d.innerHTML = `
-      <summary>
-        <span class="chevron">›</span>
-        <span class="module-name">${m.icon} ${esc(m.name)}</span>
-        <span class="module-meta">${esc(meta)} · ${active ? "in progress" : "open"}</span>
-        <div class="bar"><span style="width:${pct}%"></span></div>
-      </summary>
-      ${total ? `<div class="lessons">${m.lessons.map(([n, t, s]) => `
-        <div class="lesson ${s === "todo" ? "todo" : ""}">
-          <span class="status-dot ${dotFor(s)}"></span>
-          <span class="lesson-num">${esc(n)}</span>
-          <span class="lesson-title">${esc(t)}</span>
-          ${s === "next" ? `<span class="lesson-flag">next</span>` : ""}
-        </div>`).join("")}</div>` : ""}
-    `;
-    wrap.appendChild(d);
-  });
-  // status panel: "🔴 01 · Installation"
-  const isCur = l => l[2] === "progress" || l[2] === "next";
-  const mi = modules.findIndex(m => m.lessons.some(isCur));
-  const mv = document.getElementById("module-value");
-  if (mi < 0){ mv.textContent = "—"; return; }
-  const cur = modules[mi].lessons.find(isCur);
-  mv.textContent = `${modules[mi].icon} ${String(mi + 1).padStart(2, "0")} · ${cur[1]}`;
-}
-
-function renderSystem(){
-  document.getElementById("sys-table").innerHTML =
-    `<thead><tr><th>Component</th><th>What</th><th>Notes</th></tr></thead><tbody>` +
-    published(system).map(r => `<tr><td>${esc(r.key)}</td><td>${esc(r.what)}</td><td>${esc(r.notes)}</td></tr>`).join("") +
-    `</tbody>`;
-  document.getElementById("roadmap").innerHTML = roadmap.map(([state, title, text, tag]) => `
-    <div class="stage">
-      <span class="status-dot ${dotFor(state)}"></span>
-      <div class="stage-title">${esc(title)}<span class="stage-tag">${esc(tag)}</span></div>
-      <div class="stage-text">${esc(text)}</div>
-    </div>`).join("");
-}
-
-function field(label, items){
-  if (!items || !items.length) return "";
-  return `<div class="entry-field"><h4>${esc(label)}</h4><ul>${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`;
-}
-
-function renderSessions(){
-  const feed = document.getElementById("sessions-feed");
-  feed.innerHTML = "";
-  // newest first; undated entries at the end (in source order)
-  const list = published(sessions).sort((a, b) => (b.date || "0000").localeCompare(a.date || "0000"));
-  list.forEach(s => {
-    const done = s.status === "done";
-    const details = document.createElement("details");
-    details.className = "entry";
-    details.innerHTML = `
-      <summary>
-        <div class="entry-meta">
-          <span class="status-dot ${done ? "status-dot--ok" : "status-dot--progress"}"></span>
-          ${s.date ? `<time>${esc(s.date)}</time>` : ""}
-          ${s.hash ? `<span>#${esc(s.hash)}</span>` : ""}
-          <span>· ${done ? "done" : "in progress"}</span>
-        </div>
-        <h3 class="entry-title">${esc(s.title)}</h3>
-        <p class="entry-lead">${esc(s.summary)}</p>
-        <div class="entry-tags">${s.tags.map(tag => `<span class="chip">${esc(tag)}</span>`).join("")}</div>
-        <span class="entry-toggle"><span class="chevron">›</span> View full entry</span>
-      </summary>
-      <div class="entry-body">
-        ${field("What I did", s.done)}
-        ${field("Learned", s.learned)}
-        ${field("Encountered", s.encountered)}
-        ${field("Solved by", s.solved)}
-        ${field("Result", s.result)}
-        ${field("Next step", s.next)}
-        ${s.evidence ? `<div class="entry-field entry-evidence"><h4>Evidence</h4><pre><code>${esc(s.evidence)}</code></pre></div>` : ""}
-      </div>
-    `;
-    feed.appendChild(details);
-  });
-}
+// Sessions that are not drafts, newest first (undated at the end)
+const liveSessions = () => published(sessions).slice().sort((a, b) => (b.date || "0000").localeCompare(a.date || "0000"));
+const layerName = n => { const l = stack.find(x => x.n === n); return l ? `L${l.n} · ${l.name}` : ""; };
+// Current layer = highest layer "in progress"; otherwise the first one not shipped
+const currentLayer = () => [...stack].reverse().find(l => l.state === "progress") || stack.find(l => l.state !== "shipped") || stack[stack.length - 1];
 
 // "YYYY-MM" → "March 2026"
 function monthLabel(ym){
   const [y, m] = ym.split("-").map(Number);
   return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 }
-
-function renderStatus(){
-  document.getElementById("community-value").textContent =
-    CONFIG.communitySince ? `since ${monthLabel(CONFIG.communitySince)}` : "—";
-  const sv = document.getElementById("started-value");
-  const uv = document.getElementById("uptime-value");
-  if (!CONFIG.startDate) return;
-  const now = new Date();
-  if (/^\d{4}-\d{2}$/.test(CONFIG.startDate)){
-    const [y, m] = CONFIG.startDate.split("-").map(Number);
-    const months = Math.max(0, (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m));
-    sv.textContent = monthLabel(CONFIG.startDate);
-    uv.textContent = `${months} ${months === 1 ? "month" : "months"}`;
-  } else {
-    const days = Math.max(0, Math.floor((now - new Date(CONFIG.startDate + "T00:00:00")) / 86400000));
-    sv.textContent = CONFIG.startDate;
-    uv.textContent = `Day ${days}`;
-  }
+function monthsSince(ym){
+  const [y, m] = ym.split("-").map(Number), now = new Date();
+  return Math.max(0, (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m));
 }
 
-// status row: types "actively <word>", deletes it, moves to the next word.
-// Reduced motion: full sentence, no animation.
+/* ---------- Header + intro ---------- */
+function renderIntro(){
+  $("brand-name").textContent = CONFIG.handle;
+  $("brand-host").textContent = CONFIG.host;
+  $("hero-eyebrow").textContent = TEXT.eyebrow;
+  $("hero-title").innerHTML = esc(TEXT.title) + (TEXT.titleSoft ? `<br><span class="soft">${esc(TEXT.titleSoft)}</span>` : "");
+  $("hero-lead").textContent = TEXT.lead;
+  $("hero-links").innerHTML = `<a class="btn btn-primary" href="#stack">${esc(TEXT.ctaPrimary)}</a>` + linkButtons(["linkedin", "github", "cv"]);
+}
+
+// Buttons for the links that are set in CONFIG (null = no button)
+function linkButtons(keys){
+  const L = CONFIG.links;
+  const label = { linkedin: "LinkedIn", github: "GitHub", cv: "CV (PDF)", email: TEXT.contactEmailLabel };
+  return keys.filter(k => L[k]).map(k => {
+    const href = k === "email" ? `mailto:${L[k]}` : L[k];
+    const ext = k === "email" ? "" : ` target="_blank" rel="noopener"`;
+    const cls = k === "email" ? "btn btn-primary" : "btn";
+    return `<a class="${cls}" href="${esc(href)}"${ext}>${esc(label[k])}</a>`;
+  }).join("");
+}
+
+/* ---------- Dashboard ---------- */
+function renderDashboard(){
+  $("dash-cmd").textContent = TEXT.dashCommand;
+  $("dash-state").textContent = TEXT.dashState;
+  const live = published(sessions);
+  const count = k => live.filter(s => s.kind === k).length;
+  const values = {
+    layer: () => { const c = currentLayer(); return `<span style="color: var(--amber)">${esc(layerName(c.n))}</span>`; },
+    entries: () => esc(`${count("log")} logs · ${count("runbook")} runbooks · ${count("note")} notes`),
+    started: () => CONFIG.startDate ? esc(monthLabel(CONFIG.startDate)) : null,
+    uptime: () => { if (!CONFIG.startDate) return null; const m = monthsSince(CONFIG.startDate); return esc(`${m} ${m === 1 ? "month" : "months"}`); },
+    kubecraft: () => CONFIG.communitySince ? esc(`since ${monthLabel(CONFIG.communitySince)}`) : null,
+    deploy: () => CONFIG.lastDeploy ? esc(`${CONFIG.lastDeploy.hash} · ${CONFIG.lastDeploy.date}`) : null,
+    status: () => `<span class="sr-only">${esc(TEXT.statusPrefix + " " + TEXT.statusWords.join(", "))}</span><span id="status-typed" aria-hidden="true"></span><span class="cursor" aria-hidden="true">_</span>`
+  };
+  // Rows whose value is null are left out
+  $("dash-rows").innerHTML = TEXT.dashboard.map(r => {
+    const v = r.compute ? (values[r.compute] ? values[r.compute]() : null) : esc(r.value);
+    return v === null || v === "" ? "" : `<dt>${esc(r.label)}</dt><dd>${v}</dd>`;
+  }).join("");
+  startStatusTyping();
+}
+
+// Typed status: "actively <word>_", one word after the other. Reduced motion: full sentence.
+let typeTimer = null;
 function startStatusTyping(){
-  const typed = document.getElementById("status-typed");
-  document.getElementById("status-full").textContent = TEXT.status_full;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-    typed.textContent = TEXT.status_full;
+  const el = $("status-typed");
+  if (!el) return;
+  clearTimeout(typeTimer);
+  const prefix = TEXT.statusPrefix + " ", words = TEXT.statusWords;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent = prefix + words.join(", "); return; }
+  let w = 0, n = 0, del = false;
+  const tick = () => {
+    n += del ? -1 : 1;
+    el.textContent = prefix + words[w].slice(0, n);
+    let delay = del ? 45 : 95;
+    if (!del && n === words[w].length){ del = true; delay = 1700; }
+    else if (del && n === 0){ del = false; w = (w + 1) % words.length; delay = 350; }
+    typeTimer = setTimeout(tick, delay);
+  };
+  el.textContent = prefix;
+  typeTimer = setTimeout(tick, 350);
+}
+
+/* ---------- 01 Stack ---------- */
+let selectedLayer = null;
+function renderStack(){
+  $("stack-title").textContent = TEXT.stackTitle;
+  $("stack-sub").textContent = TEXT.stackSub;
+  $("stack-sub").hidden = !TEXT.stackSub;
+  if (selectedLayer === null) selectedLayer = currentLayer().n;
+  // list: top layer first
+  $("stack-list").innerHTML = [...stack].reverse().map(l => `
+    <button type="button" class="layer-btn" data-layer="${l.n}" aria-pressed="${l.n === selectedLayer}">
+      <span class="layer-n">L${l.n}</span>
+      <span class="layer-names"><span class="layer-name">${esc(l.name)}</span><span class="layer-role">${esc(l.role)}</span></span>
+      <span class="badge" style="color: ${STATE[l.state].color}">${STATE[l.state].label}</span>
+    </button>`).join("");
+  $("stack-list").querySelectorAll(".layer-btn").forEach(b => b.addEventListener("click", () => { selectedLayer = Number(b.dataset.layer); renderStack(); }));
+
+  // panel: the selected layer
+  const l = stack.find(x => x.n === selectedLayer);
+  const proof = liveSessions().filter(s => s.layer === l.n);
+  $("layer-panel").innerHTML = `
+    <div class="panel-head">
+      <div style="display:flex; align-items:baseline; gap:14px"><span class="mono" style="color: var(--muted-2); font-size:14px">L${l.n}</span><h3>${esc(l.name)}</h3></div>
+      <span class="badge" style="color: ${STATE[l.state].color}">${STATE[l.state].label}</span>
+    </div>
+    ${l.covers.length ? `<div class="panel-block"><div class="label">covers</div><div class="chips">${l.covers.map(c => `<span class="chip">${esc(c)}</span>`).join("")}</div></div>` : ""}
+    ${l.before && l.after ? `<div class="panel-block"><div class="label">what changes in the workload</div>
+      <div class="change"><div class="change-box"><div class="card-meta" style="margin-bottom:6px">before</div>${esc(l.before)}</div>
+      <div class="change-arrow" aria-hidden="true">→</div>
+      <div class="change-box after"><div class="card-meta" style="margin-bottom:6px; color: var(--accent)">after</div>${esc(l.after)}</div></div></div>` : ""}
+    <div class="panel-block"><div class="label">proof</div>
+      ${proof.length
+        ? `<div class="link-list">${proof.map(s => `<a href="#session/${esc(s.id)}"><span class="kind">${esc(s.kind)}</span><span style="flex:1 1 auto">${esc(s.title)}</span><span aria-hidden="true" style="color: var(--muted-2)">→</span></a>`).join("")}</div>`
+        : `<p class="empty">${esc(TEXT.emptyEntries)}</p>`}
+    </div>`;
+}
+
+/* ---------- 02 Proof ---------- */
+// Six bottom-up steps: before the cause = ok, the cause = cause, after = skipped
+const traceSteps = found => STEPS.map((label, i) => ({ label, i, cls: i < found ? "" : i === found ? "cause" : "skipped", tag: i < found ? "ok" : i === found ? "cause" : "skipped" }));
+
+function renderProof(){
+  $("proof-title").textContent = TEXT.proofTitle;
+  $("proof-sub").textContent = TEXT.proofSub;
+  const cases = liveSessions().filter(s => s.case);
+  $("proof-grid").innerHTML = cases.length ? cases.map(s => `
+    <article class="card proof-card">
+      <div class="card-meta">${esc([layerName(s.layer), s.date].filter(Boolean).join(" · "))}</div>
+      <h3>${esc(s.title)}</h3>
+      ${s.trace ? `<div class="trace-mini">${traceSteps(s.trace.found).map(t => `<span class="step ${t.cls}">${esc(t.label)}<small>${t.tag}</small></span>`).join("")}</div>` : ""}
+      <dl class="case-dl">
+        <dt>symptom</dt><dd>${esc(s.case.symptom)}</dd>
+        <dt>cause</dt><dd>${esc(s.case.cause)}</dd>
+        <dt>fix</dt><dd>${esc(s.case.fix)}</dd>
+        <dt class="ok">verified</dt><dd style="color: var(--ink)">${esc(s.case.verified)}</dd>
+      </dl>
+      <a class="more" href="#session/${esc(s.id)}">Read the full entry →</a>
+    </article>`).join("") : `<p class="empty">${esc(TEXT.emptyEntries)}</p>`;
+}
+
+/* ---------- 03 Working log ---------- */
+function isoDate(d){ return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+
+function renderLog(){
+  $("log-title").textContent = TEXT.logTitle;
+  $("log-sub").textContent = TEXT.logSub;
+  const list = liveSessions();
+
+  // Activity grid: 16 weeks × 7 days (Mon–Sun), real dates of published sessions
+  const perDay = {};
+  list.forEach(s => { if (s.date) perDay[s.date] = (perDay[s.date] || 0) + 1; });
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setDate(today.getDate() - ((today.getDay() + 6) % 7) - 15 * 7);   // Monday, 15 weeks before this week
+  const shades = ["#18222a", "rgba(70,224,138,.35)", "rgba(70,224,138,.6)", "rgba(70,224,138,.85)", "var(--accent)"];
+  let cells = "", inRange = 0;
+  for (let i = 0; i < 112; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const n = perDay[isoDate(d)] || 0;
+    inRange += n;
+    const bg = d > today ? "transparent" : shades[Math.min(n, 4)];
+    cells += `<span style="background:${bg}" title="${isoDate(d)}: ${n}"></span>`;
+  }
+  $("activity").innerHTML = cells;
+  $("activity").setAttribute("aria-label", `Activity grid: ${inRange} entries in the last 16 weeks`);
+  $("grid-count").textContent = `${inRange} ${inRange === 1 ? "entry" : "entries"}`;
+
+  // Table
+  $("log-rows").innerHTML = list.length ? list.map(s => `
+    <tr>
+      <td class="m">${esc(s.date || "")}</td>
+      <td class="k">${esc(s.kind)}</td>
+      <td class="m">${s.layer ? "L" + esc(s.layer) : ""}</td>
+      <td><a href="#session/${esc(s.id)}">${esc(s.title)}</a></td>
+    </tr>`).join("") : `<tr><td colspan="4" class="empty">${esc(TEXT.emptyEntries)}</td></tr>`;
+}
+
+/* ---------- 04 How I work ---------- */
+function renderHow(){
+  $("how-title").textContent = TEXT.howTitle;
+  $("how-sub").textContent = TEXT.howSub;
+  $("how-sub").hidden = !TEXT.howSub;
+  $("habits").innerHTML = TEXT.habits.map((h, i) => `
+    <div class="habit"><div class="card-meta" style="font-size:13px">${String(i + 1).padStart(2, "0")}</div><h3>${esc(h.title)}</h3><p>${esc(h.text)}</p></div>`).join("");
+}
+
+/* ---------- 05 Contact ---------- */
+function renderContact(){
+  $("contact-title").textContent = TEXT.contactTitle;
+  $("contact-sub").textContent = TEXT.contactSub;
+  $("contact-sub").hidden = !TEXT.contactSub;
+  $("contact-links").innerHTML = linkButtons(["email", "linkedin", "github", "cv"]);
+}
+
+/* ---------- Footer ---------- */
+function renderFooter(){
+  $("footer-text").textContent = TEXT.footer;
+  $("footer-link").innerHTML = CONFIG.links.source ? `<a href="${esc(CONFIG.links.source)}" target="_blank" rel="noopener">view source →</a>` : "";
+}
+
+/* ---------- Detail view: #session/<id> ---------- */
+function list(label, items){
+  return items && items.length ? `<div class="field panel-block"><div class="label">${esc(label)}</div><ul>${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>` : "";
+}
+// Terminal block: lines that start with "$ " get a green prompt
+function terminal(text, env){
+  const lines = String(text).split("\n").map(line => line.startsWith("$ ") ? `<span class="prompt">$</span> ${esc(line.slice(2))}` : esc(line)).join("\n");
+  return `<div class="panel-block"><div class="label">terminal</div><div class="term"><div class="term-bar">${esc(env || "shell")} · bash</div><pre>${lines}</pre></div></div>`;
+}
+
+function renderDetail(id){
+  const s = published(sessions).find(x => x.id === id);
+  const back = `<a class="mono" href="#log" style="color: var(--ink-2); text-decoration:none">← back to the log</a>`;
+  if (!s){
+    $("detail").innerHTML = `<div class="detail"><div class="detail-main"><h1>Entry not found</h1>${back}</div></div>`;
     return;
   }
-  const prefix = TEXT.status_prefix + " ";
-  const words = TEXT.status_words;
-  let w = 0, n = 0, deleting = false;
-  const tick = () => {
-    const word = words[w];
-    n += deleting ? -1 : 1;
-    typed.textContent = prefix + word.slice(0, n);
-    let delay = deleting ? 45 : 95;
-    if (!deleting && n === word.length){ deleting = true; delay = 1700; }
-    else if (deleting && n === 0){ deleting = false; w = (w + 1) % words.length; delay = 350; }
-    setTimeout(tick, delay);
-  };
-  typed.textContent = prefix;
-  setTimeout(tick, 350);
+  const l = stack.find(x => x.n === s.layer);
+  const trace = s.trace ? `<div class="panel-block"><div class="label">trace</div><div class="trace">${traceSteps(s.trace.found).map(t => `
+      <div class="step ${t.cls}"><div style="display:flex; justify-content:space-between; font-size:12px"><span style="color: var(--muted-2)">0${t.i + 1}</span><span>${t.tag}</span></div>
+      <div>${esc(t.label)}</div><div class="note">${esc((s.trace.notes || [])[t.i] || "")}</div></div>`).join("")}</div></div>` : "";
+  const cards = s.case ? `<div class="case-cards">
+      <div class="card"><div class="card-meta">root cause</div><p>${esc(s.case.cause)}</p></div>
+      <div class="card"><div class="card-meta">fix</div><p>${esc(s.case.fix)}</p></div>
+      <div class="card ok"><div class="card-meta">verified</div><p>${esc(s.case.verified)}</p></div>
+    </div>` : "";
+  const related = (s.related || []).map(r => published(sessions).find(x => x.id === r)).filter(Boolean);
+
+  $("detail").innerHTML = `<div class="detail">
+    <article class="detail-main">
+      ${back}
+      <div class="panel-block" style="gap:16px">
+        <div class="tagline">
+          ${s.date ? `<span class="tag">${esc(s.date)}</span>` : ""}
+          ${l ? `<span class="tag">${esc(layerName(l.n))}</span>` : ""}
+          <span class="tag kind-tag">${esc(s.kind)}</span>
+          ${s.time ? `<span class="tag">${esc(s.time)}</span>` : ""}
+          ${s.status === "progress" ? `<span class="tag" style="color: var(--amber); border-color: var(--amber)">in progress</span>` : ""}
+        </div>
+        <h1>${esc(s.title)}</h1>
+        <p class="hero-lead">${esc(s.summary)}</p>
+      </div>
+      ${trace}
+      ${s.evidence ? terminal(s.evidence, s.env) : ""}
+      ${cards}
+      ${list("learned", s.learned)}${list("encountered", s.encountered)}${list("solved by", s.solved)}${list("result", s.result)}${list("next", s.next)}
+      ${s.hash ? `<p class="mono" style="color: var(--muted)">commit ${esc(s.hash)}</p>` : ""}
+    </article>
+    <aside class="detail-side">
+      ${l ? `<div class="card side-card"><div class="label">layer</div>
+        <div style="display:flex; align-items:center; gap:12px"><span class="mono" style="color: var(--muted-2)">L${l.n}</span><span style="font-weight:600; font-size:18px">${esc(l.name)}</span>
+        <span class="badge" style="margin-left:auto; color: ${STATE[l.state].color}">${STATE[l.state].label}</span></div>
+        <div class="layer-bar" aria-hidden="true">${stack.map(x => `<span class="${x.n <= l.n ? "on" : ""}"></span>`).join("")}</div></div>` : ""}
+      ${s.topics && s.topics.length ? `<div class="card side-card"><div class="label">topics</div><div class="chips">${s.topics.map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div></div>` : ""}
+      ${related.length ? `<div class="card side-card"><div class="label">related</div><div class="link-list">${related.map(r => `<a href="#session/${esc(r.id)}"><span style="flex:1 1 auto">${esc(r.title)}</span><span class="kind" style="width:auto">${esc(r.kind)}</span></a>`).join("")}</div></div>` : ""}
+    </aside>
+  </div>`;
 }
 
-document.getElementById("brand-name").textContent = CONFIG.handle;
-renderLinks();
-renderBackground();
-renderPath();
-renderSystem();
-renderStatus();
-startStatusTyping();
-renderSessions();
+/* ---------- Router: landing view or detail view, based on the URL hash ---------- */
+function route(){
+  const m = location.hash.match(/^#session\/(.+)$/);
+  $("landing").hidden = !!m;
+  $("detail").hidden = !m;
+  if (m){
+    renderDetail(decodeURIComponent(m[1]));
+    window.scrollTo(0, 0);
+    document.title = `${$("detail").querySelector("h1").textContent} · ${CONFIG.handle}`;
+  } else {
+    document.title = "Velislav · Linux / DevOps portfolio";
+    const target = location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    if (target) target.scrollIntoView();
+  }
+}
+
+/* ---------- Start ---------- */
+renderIntro();
+renderDashboard();
+renderStack();
+renderProof();
+renderLog();
+renderHow();
+renderContact();
+renderFooter();
+window.addEventListener("hashchange", route);
+route();
 </script>
 </body>
 </html>

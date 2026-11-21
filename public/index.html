@@ -166,13 +166,38 @@
   .log-table a{ color: var(--ink); text-decoration: none; }
   .log-table a:hover{ color: var(--accent); }
 
-  /* ============ 04 How I work ============ */
+  /* ============ 04 Runbooks ============ */
+  .filter{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .filter button{ font: inherit; font-family: var(--font-mono); font-size: 13px; cursor: pointer; padding: 6px 12px; border-radius: 2px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink-2); }
+  .filter button[aria-pressed="true"]{ border-color: var(--accent); color: var(--accent); background: rgba(70,224,138,.07); }
+  .rb-groups{ display: flex; flex-direction: column; gap: 28px; }
+  .rb-group h3{ font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: .06em; color: var(--muted-2); text-transform: uppercase; margin-bottom: 10px; }
+  .rb-item{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 18px 20px; text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line); }
+  .rb-item:hover{ color: var(--accent); }
+  .rb-item .rb-name{ flex: 1 1 320px; font-weight: 600; }
+  .rb-item .card-meta{ white-space: nowrap; }
+  .rb-steps{ display: flex; flex-direction: column; gap: 14px; counter-reset: none; }
+  .rb-step{ padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
+  .rb-step h4{ font-size: 17px; font-weight: 600; display: flex; gap: 12px; align-items: baseline; }
+  .rb-step h4 .n{ font-family: var(--font-mono); font-size: 13px; color: var(--muted-2); }
+  .rb-step p{ color: var(--ink-2); }
+  .rb-step .term pre{ padding: 14px 16px; }
+  .rb-kv{ margin: 0; display: grid; grid-template-columns: 96px minmax(0, 1fr); row-gap: 8px; column-gap: 14px; font-size: 15px; }
+  .rb-kv dt{ font-family: var(--font-mono); font-size: 12px; color: var(--muted-2); padding-top: 3px; }
+  .rb-kv dt.ok{ color: var(--accent); }
+  .rb-kv dd{ margin: 0; color: var(--ink-2); }
+  .rb-table{ width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; }
+  .rb-table th{ text-align: left; font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--muted-2); padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .rb-table td{ padding: 12px 16px; border-bottom: 1px solid var(--line-soft); color: var(--ink-2); vertical-align: top; }
+  .warn{ border-left: 2px solid var(--amber); padding: 10px 14px; color: var(--ink-2); background: rgba(242,184,75,.06); }
+
+  /* ============ 05 How I work ============ */
   .habits{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; }
   .habit{ border-top: 2px solid var(--accent); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
   .habit h3{ font-size: 20px; font-weight: 600; }
   .habit p{ color: var(--ink-3); }
 
-  /* ============ 05 Contact ============ */
+  /* ============ 06 Contact ============ */
   .contact{ flex-direction: row !important; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 32px; }
 
   /* ============ Session detail view (#session/<id>) ============ */
@@ -219,6 +244,7 @@
       <a href="#stack">stack</a>
       <a href="#proof">proof</a>
       <a href="#log">log</a>
+      <a href="#runbooks">runbooks</a>
       <a href="#how">how I work</a>
       <a class="nav-cta" href="#contact">contact</a>
     </nav>
@@ -298,11 +324,24 @@
     </div>
   </section>
 
-  <!-- 04 · HOW I WORK: habit cards -->
-  <section class="section" id="how">
+  <!-- 04 · RUNBOOKS: library of published runbooks, grouped by main category, with a category filter -->
+  <section class="section" id="runbooks">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">[ 04 · how I work ]</p>
+        <p class="eyebrow">[ 04 · runbooks ]</p>
+        <h2 id="rb-title"></h2>
+        <p class="section-sub" id="rb-sub"></p>
+      </div>
+      <div class="filter" id="rb-filter" role="group" aria-label="Filter runbooks by category"></div>
+      <div class="rb-groups" id="rb-groups"></div>
+    </div>
+  </section>
+
+  <!-- 05 · HOW I WORK: habit cards -->
+  <section class="section alt" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">[ 05 · how I work ]</p>
         <h2 id="how-title"></h2>
         <p class="section-sub" id="how-sub"></p>
       </div>
@@ -310,11 +349,11 @@
     </div>
   </section>
 
-  <!-- 05 · CONTACT: heading, one line, contact buttons -->
-  <section class="section alt" id="contact">
+  <!-- 06 · CONTACT: heading, one line, contact buttons -->
+  <section class="section" id="contact">
     <div class="wrap contact">
       <div class="section-head" style="max-width:620px">
-        <p class="eyebrow">[ 05 · contact ]</p>
+        <p class="eyebrow">[ 06 · contact ]</p>
         <h2 id="contact-title"></h2>
         <p class="section-sub" id="contact-sub"></p>
       </div>
@@ -391,6 +430,9 @@ const TEXT = {
   proofSub: "I troubleshoot bottom-up: file → permission → program → config → input → exit code / logs. Each case shows where the cause turned up.",
   logTitle: "Working log",
   logSub: "Newest first, published from my notes. Learning notes explain why, runbooks list the steps, and the daily log records what happened.",
+  rbTitle: "Runbooks",
+  rbSub: "Step-by-step procedures from my own systems. Each one lists what you need, what to expect at every step, how to check it worked, and what to do when something goes wrong.",
+  rbAll: "all",
   howTitle: "How I work",
   howSub: "",
   habits: [],                 // { title: "…", text: "…" } — filled in step 5
@@ -415,6 +457,10 @@ const stack = [
   { n: 5, name: "Kubernetes", role: "Orchestration",  state: "queued",   covers: [], before: "", after: "" }
 ];
 
+/* ---------- CATEGORIES: system areas, in the order a system is built and run ----------
+   Used by runbooks (and optionally logs/notes). The first category of an entry is its main area. */
+const CATEGORIES = ["hardware", "installation", "configuration", "users", "access", "networking", "services", "storage", "processes", "logs", "security"];
+
 /* ---------- SESSIONS: working sessions, one per chosen vault note ----------
    Template (copy, fill, remove what you don't need):
    {
@@ -434,8 +480,80 @@ const stack = [
      topics: [],                        // side-panel chips
      related: [],                       // ids of other sessions
      evidence: "$ command\noutput"      // real output; nothing private (user name, hostnames, IPs, keys)
+   }
+   Runbook (kind: "runbook") — extra fields, mirrors the vault runbook (03_Resources/runbooks/):
+   {
+     categories: ["installation", "access"],   // first = main area (from CATEGORIES)
+     tested: "YYYY-MM-DD", environment: "hardware · OS · version",
+     prereqs: ["…"], warning: "…",
+     steps:  [{ title: "…", text: "…", cmd: "…", explain: "…", man: "cmd(1)", expected: "…", check: "…" }],   // all but title optional
+     verify: [ same format as steps ],
+     troubleshooting: [{ symptom: "…", check: "…", fix: "…" }],
+     rollback: "…"
    } */
 const sessions = [
+  {
+    // Runbook — vault: 03_Resources/runbooks/Runbook - Ubuntu Server on a Raspberry Pi 5.md
+    id: "runbook-ubuntu-server-pi5", date: "2026-11-20", status: "done",
+    kind: "runbook", layer: 1, env: "workstation",
+    categories: ["installation", "access", "configuration", "users", "networking", "services"],
+    tested: "2026-11-20",
+    environment: "Raspberry Pi 5 (8 GB) · Ubuntu Server 24.04.4 LTS · workstation: Fedora (first run: Windows 11)",
+    tags: ["course=section-1", "lesson=installation"],
+    title: "Ubuntu Server on a Raspberry Pi 5: installation and first SSH login",
+    summary: "From an empty SD card to a server I can reach over SSH: prepare the card with Raspberry Pi Imager, boot the Pi, log in on the console, then connect from the workstation. Placeholders: <hostname>, <user>, <pi-ip>, <ssid>.",
+    prereqs: [
+      "Raspberry Pi 5 (8 GB)",
+      "microSD card and a card reader on the workstation",
+      "Raspberry Pi Imager on the workstation (raspberrypi.com/software)",
+      "Monitor and keyboard for the Pi (first login on the console)",
+      "Wi-Fi name and password (for a headless setup)",
+      "Planned values ready: hostname, user name, password"
+    ],
+    warning: "Writing the image erases everything on the SD card.",
+    steps: [
+      { title: "Open Raspberry Pi Imager", text: "On the workstation." },
+      { title: "Choose device", text: "Raspberry Pi 5." },
+      { title: "Choose the operating system", text: "Other general-purpose OS → Ubuntu → Ubuntu Server (the LTS version, 64-bit)." },
+      { title: "Choose storage", text: "Select the SD card. Check the size and name twice: the selected device gets overwritten." },
+      { title: "Settings (OS customisation)", text: "General: hostname <hostname>, user <user> and password, wireless LAN <ssid> and password. Services: enable SSH, use password authentication (temporary, see Next). Options: eject media when finished." },
+      { title: "Save and write", text: "Start writing and wait until writing and verifying are finished.", check: "The Imager reports success and ejects the card." },
+      { title: "First boot", text: "Insert the SD card into the Pi, connect monitor and keyboard, then power. On the first boot, cloud-init applies the settings from step 5: it creates the user, sets the hostname, configures Wi-Fi and generates the SSH host keys. This can take a minute or two." },
+      { title: "Console login", text: "At the prompt <hostname> login: enter the user name and password from step 5.", check: "A shell prompt <user>@<hostname>:~$" },
+      { title: "Find the Pi's IP address", text: "The welcome message after login shows it. Or:", cmd: "hostname -I",
+        explain: "hostname = shows or sets the system's host name; -I = print all IP addresses of the host", man: "hostname(1)",
+        expected: "One or more addresses, e.g. 192.168.x.y. The first IPv4 address is <pi-ip>." },
+      { title: "First SSH login (from the workstation)", cmd: "ssh <user>@<pi-ip>",
+        explain: "ssh = OpenSSH client, opens an encrypted remote shell; operand <user>@<pi-ip> = log in as <user> on the host at <pi-ip>", man: "ssh(1)",
+        expected: "First connection only: confirm the host key with yes (it is saved in ~/.ssh/known_hosts). Then the password from step 5, and Welcome to Ubuntu 24.04.x LTS with a prompt <user>@<hostname>:~$." }
+    ],
+    verify: [
+      { title: "Operating system", cmd: "cat /etc/os-release",
+        explain: "cat = print a file's content; operand = the file describing the installed OS", man: "cat(1), os-release(5)",
+        expected: "PRETTY_NAME=\"Ubuntu 24.04.x LTS\", ID=ubuntu" },
+      { title: "Hostname and hardware", cmd: "hostnamectl",
+        explain: "hostnamectl, no subcommand = host name, OS, kernel and architecture", man: "hostnamectl(1)",
+        expected: "Static hostname: <hostname>, Operating System: Ubuntu 24.04.x LTS, Architecture: arm64" },
+      { title: "SSH service", cmd: "systemctl status ssh --no-pager",
+        explain: "systemctl = controls systemd; status = state of a unit; ssh = the SSH server unit; --no-pager = print directly", man: "systemctl(1)",
+        expected: "Active: active (running). On Ubuntu 24.04 SSH can be socket-activated: then ssh.socket is active (listening) and the service starts on the first connection." },
+      { title: "Clock synchronized", cmd: "timedatectl",
+        explain: "timedatectl, no subcommand = system time, time zone, sync status", man: "timedatectl(1)",
+        expected: "System clock synchronized: yes, NTP service: active",
+        text: "Why: the Pi 5 has no battery-backed clock. Until the first network time sync, timestamps can be wrong." }
+    ],
+    troubleshooting: [
+      { symptom: "Console login fails right after the first boot", check: "Has cloud-init finished?", fix: "Wait 1–2 minutes, try again." },
+      { symptom: "ssh: connect to host … Connection refused", check: "systemctl status ssh on the Pi", fix: "Was SSH enabled in step 5? Start it: sudo systemctl enable --now ssh" },
+      { symptom: "ssh: … No route to host / timeout", check: "hostname -I on the Pi; is the workstation in the same network?", fix: "Use the current IP; check Wi-Fi." },
+      { symptom: "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!", check: "Was the card re-flashed? Then the Pi has a new host key.", fix: "Remove the old key on the workstation: ssh-keygen -R <pi-ip>" },
+      { symptom: "File dates or log times look wrong", check: "timedatectl", fix: "Clock not synced yet (no battery-backed clock). See the log entry on the Pi's clock." }
+    ],
+    rollback: "Re-flash the SD card (steps 1–6). Nothing else on the workstation changes, except the host key in ~/.ssh/known_hosts (remove it with ssh-keygen -R <pi-ip>).",
+    next: ["SSH: key-based login, then password authentication off", "Section 2: first commands on the server"],
+    topics: ["Raspberry Pi Imager", "cloud-init", "SSH", "systemd"],
+    related: ["pi5-ubuntu-server", "pi5-clock-before-ntp"]
+  },
   {
     // Entry 1 — Section 1 · Installation (course: outside the system)
     id: "pi5-ubuntu-server", date: "2026-03", status: "done",
@@ -457,7 +575,7 @@ const sessions = [
     result: ["Ubuntu Server runs on the Pi 5 and is reachable over SSH from my workstation. My first Linux commands ran here."],
     next: ["SSH hardening: key-based login, password authentication off", "Section 2: first commands on the server"],
     topics: ["Raspberry Pi Imager", "Ubuntu Server 24.04 LTS", "SSH", "headless setup"],
-    related: ["pi5-clock-before-ntp"],
+    related: ["runbook-ubuntu-server-pi5", "pi5-clock-before-ntp"],
     evidence: "$ ssh <user>@<pi-ip>\nWelcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-1065-raspi aarch64)"
   },
   {
@@ -681,7 +799,31 @@ function renderLog(){
     </tr>`).join("") : `<tr><td colspan="4" class="empty">${esc(TEXT.emptyEntries)}</td></tr>`;
 }
 
-/* ---------- 04 How I work ---------- */
+/* ---------- 04 Runbooks: grouped by main category, filter by any category ---------- */
+let rbFilter = null;
+function renderRunbooks(){
+  $("rb-title").textContent = TEXT.rbTitle;
+  $("rb-sub").textContent = TEXT.rbSub;
+  const all = liveSessions().filter(s => s.kind === "runbook");
+  const order = c => { const i = CATEGORIES.indexOf(c); return i < 0 ? 99 : i; };
+  const cats = [...new Set(all.flatMap(r => r.categories || []))].sort((a, b) => order(a) - order(b));
+  $("rb-filter").innerHTML = all.length ? [null, ...cats].map(c =>
+    `<button type="button" data-cat="${esc(c || "")}" aria-pressed="${c === rbFilter}">${esc(c || TEXT.rbAll)}</button>`).join("") : "";
+  $("rb-filter").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rbFilter = b.dataset.cat || null; renderRunbooks(); }));
+  const shown = all.filter(r => !rbFilter || (r.categories || []).includes(rbFilter));
+  const groups = {};
+  shown.forEach(r => { const main = (r.categories || ["other"])[0]; (groups[main] = groups[main] || []).push(r); });
+  const keys = Object.keys(groups).sort((a, b) => order(a) - order(b));
+  $("rb-groups").innerHTML = keys.length ? keys.map(k => `
+    <div class="rb-group"><h3>${esc(k)}</h3><div class="card">${groups[k].map(r => `
+      <a class="rb-item" href="#session/${esc(r.id)}">
+        <span class="rb-name">${esc(r.title)}</span>
+        <span class="card-meta">${esc([layerName(r.layer), r.tested ? "tested " + r.tested : ""].filter(Boolean).join(" · "))}</span>
+        <span class="chips" style="width:100%">${(r.categories || []).map(c => `<span class="chip">${esc(c)}</span>`).join("")}</span>
+      </a>`).join("")}</div></div>`).join("") : `<p class="empty">${esc(TEXT.emptyEntries)}</p>`;
+}
+
+/* ---------- 05 How I work ---------- */
 function renderHow(){
   $("how-title").textContent = TEXT.howTitle;
   $("how-sub").textContent = TEXT.howSub;
@@ -690,7 +832,7 @@ function renderHow(){
     <div class="habit"><div class="card-meta" style="font-size:13px">${String(i + 1).padStart(2, "0")}</div><h3>${esc(h.title)}</h3><p>${esc(h.text)}</p></div>`).join("");
 }
 
-/* ---------- 05 Contact ---------- */
+/* ---------- 06 Contact ---------- */
 function renderContact(){
   $("contact-title").textContent = TEXT.contactTitle;
   $("contact-sub").textContent = TEXT.contactSub;
@@ -714,9 +856,38 @@ function terminal(text, env){
   return `<div class="panel-block"><div class="label">terminal</div><div class="term"><div class="term-bar">${esc(env || "shell")} · bash</div><pre>${lines}</pre></div></div>`;
 }
 
+// One runbook step (also used for verify): title, text, command block, explanation, man page, expected result, check
+function rbStep(st, n){
+  return `<div class="card rb-step">
+    <h4><span class="n">${esc(n)}</span>${esc(st.title)}</h4>
+    ${st.text ? `<p>${esc(st.text)}</p>` : ""}
+    ${st.cmd ? `<div class="term"><pre><span class="prompt">$</span> ${esc(st.cmd)}</pre></div>` : ""}
+    ${st.explain || st.man || st.expected || st.check ? `<dl class="rb-kv">
+      ${st.explain ? `<dt>what</dt><dd>${esc(st.explain)}</dd>` : ""}
+      ${st.man ? `<dt>man</dt><dd class="mono" style="font-size:13px">${esc(st.man)}</dd>` : ""}
+      ${st.expected ? `<dt>expected</dt><dd>${esc(st.expected)}</dd>` : ""}
+      ${st.check ? `<dt class="ok">✓ check</dt><dd style="color: var(--ink)">${esc(st.check)}</dd>` : ""}
+    </dl>` : ""}
+  </div>`;
+}
+function runbookBody(s){
+  if (s.kind !== "runbook") return "";
+  const block = (label, inner) => inner ? `<div class="panel-block"><div class="label">${esc(label)}</div>${inner}</div>` : "";
+  return [
+    block("prerequisites", (s.prereqs || []).length ? `<div class="field"><ul>${s.prereqs.map(p => `<li>${esc(p)}</li>`).join("")}</ul></div>` : ""),
+    s.warning ? `<p class="warn">⚠ ${esc(s.warning)}</p>` : "",
+    block("steps", (s.steps || []).length ? `<div class="rb-steps">${s.steps.map((st, i) => rbStep(st, String(i + 1).padStart(2, "0"))).join("")}</div>` : ""),
+    block("verify", (s.verify || []).length ? `<div class="rb-steps">${s.verify.map((st, i) => rbStep(st, "V" + (i + 1))).join("")}</div>` : ""),
+    block("troubleshooting", (s.troubleshooting || []).length ? `<div class="table-scroll card"><table class="rb-table"><thead><tr><th>symptom</th><th>check</th><th>fix</th></tr></thead><tbody>${s.troubleshooting.map(t => `<tr><td>${esc(t.symptom)}</td><td>${esc(t.check)}</td><td>${esc(t.fix)}</td></tr>`).join("")}</tbody></table></div>` : ""),
+    block("rollback", s.rollback ? `<p style="color: var(--ink-2)">${esc(s.rollback)}</p>` : "")
+  ].join("");
+}
+
 function renderDetail(id){
   const s = published(sessions).find(x => x.id === id);
-  const back = `<a class="mono" href="#log" style="color: var(--ink-2); text-decoration:none">← back to the log</a>`;
+  const isRb = !!(sessions.find(x => x.id === id && x.kind === "runbook"));
+  const back = isRb ? `<a class="mono" href="#runbooks" style="color: var(--ink-2); text-decoration:none">← back to the runbooks</a>`
+                    : `<a class="mono" href="#log" style="color: var(--ink-2); text-decoration:none">← back to the log</a>`;
   if (!s){
     $("detail").innerHTML = `<div class="detail"><div class="detail-main"><h1>Entry not found</h1>${back}</div></div>`;
     return;
@@ -741,12 +912,14 @@ function renderDetail(id){
           ${l ? `<span class="tag">${esc(layerName(l.n))}</span>` : ""}
           <span class="tag kind-tag">${esc(s.kind)}</span>
           ${s.time ? `<span class="tag">${esc(s.time)}</span>` : ""}
+          ${s.tested ? `<span class="tag" style="color: var(--accent)">tested ${esc(s.tested)}</span>` : ""}
           ${s.status === "progress" ? `<span class="tag" style="color: var(--amber); border-color: var(--amber)">in progress</span>` : ""}
         </div>
         <h1>${esc(s.title)}</h1>
         <p class="hero-lead">${esc(s.summary)}</p>
       </div>
       ${trace}
+      ${runbookBody(s)}
       ${s.evidence ? terminal(s.evidence, s.env) : ""}
       ${cards}
       ${list("learned", s.learned)}${list("encountered", s.encountered)}${list("solved by", s.solved)}${list("result", s.result)}${list("next", s.next)}
@@ -757,6 +930,8 @@ function renderDetail(id){
         <div style="display:flex; align-items:center; gap:12px"><span class="mono" style="color: var(--muted-2)">L${l.n}</span><span style="font-weight:600; font-size:18px">${esc(l.name)}</span>
         <span class="badge" style="margin-left:auto; color: ${STATE[l.state].color}">${STATE[l.state].label}</span></div>
         <div class="layer-bar" aria-hidden="true">${stack.map(x => `<span class="${x.n <= l.n ? "on" : ""}"></span>`).join("")}</div></div>` : ""}
+      ${s.categories && s.categories.length ? `<div class="card side-card"><div class="label">categories</div><div class="chips">${s.categories.map(c => `<span class="chip">${esc(c)}</span>`).join("")}</div></div>` : ""}
+      ${s.environment ? `<div class="card side-card"><div class="label">tested on</div><p style="color: var(--ink-2); font-size:14px">${esc(s.environment)}</p></div>` : ""}
       ${s.topics && s.topics.length ? `<div class="card side-card"><div class="label">topics</div><div class="chips">${s.topics.map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div></div>` : ""}
       ${related.length ? `<div class="card side-card"><div class="label">related</div><div class="link-list">${related.map(r => `<a href="#session/${esc(r.id)}"><span style="flex:1 1 auto">${esc(r.title)}</span><span class="kind" style="width:auto">${esc(r.kind)}</span></a>`).join("")}</div></div>` : ""}
     </aside>
@@ -785,6 +960,7 @@ renderDashboard();
 renderStack();
 renderProof();
 renderLog();
+renderRunbooks();
 renderHow();
 renderContact();
 renderFooter();

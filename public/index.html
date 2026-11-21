@@ -435,7 +435,57 @@ const stack = [
      related: [],                       // ids of other sessions
      evidence: "$ command\noutput"      // real output; nothing private (user name, hostnames, IPs, keys)
    } */
-const sessions = [];
+const sessions = [
+  {
+    // Entry 1 — Section 1 · Installation (course: outside the system)
+    id: "pi5-ubuntu-server", date: "2026-03", status: "done",
+    kind: "log", layer: 1, env: "workstation",
+    tags: ["course=section-1", "lesson=installation", "env=homelab"],
+    title: "Ubuntu Server on a Raspberry Pi 5: installation and first SSH login",
+    summary: "Set up my first Linux server. I prepared the SD card with Raspberry Pi Imager on Windows 11, booted the Pi, logged in on the console and then connected from my workstation over SSH.",
+    done: [
+      "Flashed Ubuntu Server onto the SD card with Raspberry Pi Imager on Windows 11 (device: Raspberry Pi 5, 8 GB; OS: Other general-purpose OS → Ubuntu → Ubuntu Server)",
+      "Pre-configured it in the Imager: hostname, user and password, Wi-Fi for a headless setup, SSH enabled with password authentication",
+      "Moved the SD card into the Pi, booted it with a monitor and keyboard attached, logged in on the console",
+      "Connected from my workstation over SSH (back then Windows 11 with WezTerm, now Fedora)"
+    ],
+    learned: [
+      "The Imager writes and pre-configures the system on the card before the first boot",
+      "A VM is a computer inside your computer, created by a hypervisor. I tried VMs too, but chose real hardware: it makes the learning more concrete",
+      "Why Ubuntu Server: widely used on servers and an easy place to start"
+    ],
+    result: ["Ubuntu Server runs on the Pi 5 and is reachable over SSH from my workstation. My first Linux commands ran here."],
+    next: ["SSH hardening: key-based login, password authentication off", "Section 2: first commands on the server"],
+    topics: ["Raspberry Pi Imager", "Ubuntu Server 24.04 LTS", "SSH", "headless setup"],
+    related: ["pi5-clock-before-ntp"],
+    evidence: "$ ssh <user>@<pi-ip>\nWelcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-1065-raspi aarch64)"
+  },
+  {
+    // Entry 1b — found while dating Entry 1 (2026-11-20)
+    id: "pi5-clock-before-ntp", date: "2026-11-20", status: "done",
+    kind: "log", layer: 1, env: "homelab",
+    tags: ["topic=time", "topic=systemd", "env=homelab"],
+    title: "File dates older than the hardware: the Pi's clock before the first time sync",
+    summary: "While dating my first install, the SSH host key and home directory showed 10 February 2026, a month before the Pi arrived. The journal showed why: the clock had no real time until the first network time sync on 4 April 2026.",
+    case: {
+      symptom: "The SSH host key and the home directory show 10 February 2026. The Pi arrived on 9 March 2026.",
+      cause: "The Pi 5 has no battery-backed clock. At boot, systemd used a stored time; the first network time sync only happened on 4 April 2026.",
+      fix: "Nothing to repair: the clock syncs now. For the documentation, the install is dated from the arrival and my notes, not from file timestamps.",
+      verified: "The journal shows the restored timestamp and the initial clock synchronization on 2026-04-04; timedatectl shows System clock synchronized: yes."
+    },
+    learned: [
+      "stat -c '%w' shows when a file was created (birth time)",
+      "On the first boot, cloud-init creates the user and the SSH host keys",
+      "Without a battery-backed clock, timestamps before the first network time sync can be wrong",
+      "journalctl --list-boots and journalctl -u <unit> show what the system recorded, boot by boot and service by service"
+    ],
+    result: ["The install date can't be read from the system. Entry 1 is dated from the arrival and my notes. Today the clock is synchronized."],
+    next: ["Find out why there was no time sync from 22 March to 4 April (not proven yet)"],
+    topics: ["stat", "journalctl", "systemd-timesyncd", "timedatectl", "cloud-init"],
+    related: ["pi5-ubuntu-server"],
+    evidence: "$ stat -c '%w  %n' /etc/ssh/ssh_host_ed25519_key.pub ~\n2026-02-10 04:01:20.077999993 +0100  /etc/ssh/ssh_host_ed25519_key.pub\n2026-02-10 04:01:17.789999995 +0100  /home/<user>\n\n$ journalctl -u systemd-timesyncd --no-pager | head -n 10\nMar 22 19:24:50 <host> systemd-timesyncd[562]: System clock time unset or jumped backwards, restored from recorded timestamp: Sun 2026-03-22 19:24:50 CET\n…\nApr 04 15:47:52 <host> systemd-timesyncd[562]: Initial clock synchronization to Sat 2026-04-04 15:47:52.746316 CEST.\n\n$ timedatectl\nSystem clock synchronized: yes\n              NTP service: active"
+  }
+];
 
 
 /* #########################################################
